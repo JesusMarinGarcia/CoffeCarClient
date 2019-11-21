@@ -13,6 +13,7 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
 
+
     <title>Anuncio</title>
 </head>
 <body>
@@ -34,22 +35,58 @@
         </ul>
     </div>
 </nav>
-
+<br>
 <form id="crearAnuncio">
 
     <div class="nav justify-content-center" style="padding-top: 1%">
-        <div class="custom-file" style="max-width: 20%">
-            <input type="file" class="custom-file-input" id="inputGroupFile01">
+        <div class="custom-file" style="max-width: 20%; min-width: 200px">
+            <input type="file" class="custom-file-input" id="inputGroupFile01" name="foto">
             <label class="custom-file-label" for="inputGroupFile01">Elige una foto</label>
+        </div>
+
+    </div>
+
+    <div class="nav justify-content-center" style="padding-top: 2%">
+        <div class="input-group" style="max-width: 20%">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Asientos:</span>
+                <span style="min-width: 42px" class="input-group-text" id="nasientos"></span>
+            </div>
+                <input style="width: 55%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
+
         </div>
     </div>
 
+    <div class="nav justify-content-center" style="padding-top: 2%">
+        <div class="input-group input-group mb-3" style="width: 350px">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Fecha salida</span>
+            </div>
+            <input type="datetime-local" name="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+        </div>
+        <div class="input-group input-group mb-3" style="width: 350px; margin-left: 20px">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Fecha llegada</span>
+            </div>
+            <input type="datetime-local" name="fechaLLegada"  class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+        </div>
+    </div>
+
+    <div class="nav justify-content-center" style="padding-top: 1%">
+        <div class="input-group" style="max-width: 50%">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Breve descripción</span>
+            </div>
+            <textarea class="form-control" aria-label="With textarea" name="descripcion"></textarea>
+        </div>
+    </div>
+
+
     <br>
-    <input type="hidden" id="latOrigen" value=""/>
-    <input type="hidden" id="longOrigen" value=""/>
-    <input type="hidden" id="latDestino" value=""/>
-    <input type="hidden" id="longDestino" value=""/>
-</form>
+    <input type="hidden" id="latOrigen" name="latOrigen" value=""/>
+    <input type="hidden" id="longOrigen" name="longOrigen" value=""/>
+    <input type="hidden" id="latDestino" name="latDestino" value=""/>
+    <input type="hidden" id="longDestino" name="longDestino" value=""/>
 
 
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
@@ -59,15 +96,14 @@
 <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
 
 <div class="row container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%">
-    <h4 for="map" style='width: 45%'>Seleccionar origen</h4>
-    <h4 for="mapDes" style='width: 45%; margin-left: 20px'>Seleccionar destino</h4>
+    <h5 for="map" style='width: 45%'>Seleccionar origen</h5>
+    <h5 for="mapDes" style='width: 45%; margin-left: 20px'>Seleccionar destino</h5>
 </div>
 
 <div class="row container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%">
     <div id='map' style='width: 45%; height: 300px; border: 4px solid lightsteelblue'></div>
     <div id="mapDes" style="width: 45%; height: 300px; margin-left: 20px; border: 4px solid indianred"></div>
 </div>
-
 
 <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
@@ -186,13 +222,36 @@
 
 </script>
 
-
+    <br>
+    <br>
+    <div class="row container-fluid justify-content-center" style="padding-left: 9%; padding-right: 9%">
+        <button type="button" class="btn btn-primary btn-lg btn-block" >¡Crear un nuevo anuncio!</button>
+    </div>
+    <br>
+    <br>
+</form>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script>
+    var slider = new Slider("#ex6");
+    slider.on("slide", function(sliderValue) {
+        document.getElementById("ex6SliderVal").textContent = sliderValue;
+    });
+</script>
 
+<script>
+    var slider = document.getElementById("asientos");
+    var output = document.getElementById("nasientos");
+    output.innerHTML = slider.value; // Display the default slider value
+
+    // Update the current slider value (each time you drag the slider handle)
+    slider.oninput = function() {
+        output.innerHTML = this.value;
+    }
+</script>
 
 
 </body>
