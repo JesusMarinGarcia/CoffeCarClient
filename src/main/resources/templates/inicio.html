@@ -74,13 +74,22 @@
 </form>
 <br>
 <div class="card mb-3" style="margin-left: 1%; margin-right: 1%; padding-top: 1%">>
-    <img src="..." class="card-img-top" alt="...">
+    <div class="nav justify-content-center">
+        <img th:src="@{CoffeeCarLogo.png}" src="../static/CoffeeCarLogo.png" alt="..." style="max-width: 35%; max-height: 35%;">
+    </div>
+
     <div class="card-body">
         <h5 class="card-title">Card title</h5>
         <p style="text-align: center" class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
         <div class="nav justify-content-center">
-            <button type="button" class="btn btn-light">Más detalles</button>
-            <button style="margin-left: 5%" type="button" class="btn btn-dark">¡Me apunto!</button>
+            <form th:action="@{}" th:object="${}" method="post">
+                <input type="hidden" th:field="${}" />
+                <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
+            </form>
+            <form th:action="@{}" th:object="${}" method="post">
+                <input type="hidden" th:field="${}" />
+                <button style="margin-left: 5%" type="submit" class="btn btn-dark">¡Me apunto!</button>
+            </form>
         </div>
         <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
     </div>
