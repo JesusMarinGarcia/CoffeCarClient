@@ -12,4 +12,9 @@ public class ClientController {
 
         return "inicio";
     }
+
+    @RequestMapping(value = "/crearAnuncio")
+    public String anuncios(){
+        return "crearAnuncio";
+    }
 }
