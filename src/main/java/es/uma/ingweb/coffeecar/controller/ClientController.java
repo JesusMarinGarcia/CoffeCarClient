@@ -13,8 +13,8 @@ public class ClientController {
         return "inicio";
     }
 
-    @RequestMapping(value = "/anuncio")
+    @RequestMapping(value = "/crearAnuncio")
     public String anuncios(){
-        return "anuncio";
+        return "crearAnuncio";
     }
 }
