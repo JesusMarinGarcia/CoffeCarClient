@@ -32,7 +32,7 @@
 
 
 <div class="nav justify-content-center" style="padding-top: 1%">
-    <form>
+    <form action="#" th:action="@{/createAnnoucement}">
         <button type="button" class="btn btn-primary btn-lg btn-block" >¡Crear un nuevo anuncio!</button>
     </form>
 </div>
@@ -82,7 +82,7 @@
         <h5 class="card-title">Card title</h5>
         <p style="text-align: center" class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
         <div class="nav justify-content-center">
-            <form th:action="@{}" th:object="${}" method="post">
+            <form th:action="@{/annoucement}" th:object="${}" method="post">
                 <input type="hidden" th:field="${}" />
                 <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
             </form>

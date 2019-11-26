@@ -2,19 +2,20 @@ package es.uma.ingweb.coffeecar.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ClientController {
 
-    @RequestMapping("/inicio")
-    public String hola(){
+    @RequestMapping("/index")                       //Inicio
+    public String index(){return "index";}
 
-        return "inicio";
+    @RequestMapping(value = "/announce")            //Crear anuncio
+    public String announce(){
+        return "announce";
     }
 
-    @RequestMapping(value = "/crearAnuncio")
-    public String anuncios(){
-        return "crearAnuncio";
+    @RequestMapping(value = "/annoucement")         //Detalles de un anuncio
+    public String annoucement(){
+        return "annoucement";
     }
 }
