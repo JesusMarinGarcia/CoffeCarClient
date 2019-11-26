@@ -29,13 +29,13 @@ public class UserConsumer {
         return new ArrayList<>(Objects.requireNonNull(usersResponse.getBody()).getContent());
     }
 
-    private void createUser(User user){
+    private void create(User user){
         restTemplate.postForEntity(URL, user, User.class);
     }
-    private void modifyUser(User user){
+    private void edit(User user){
         restTemplate.put(URL, user, User.class);
     }
-    private void deleteUser(User user){
+    private void delete(User user){
         restTemplate.delete(URL, user, User.class);
     }
 

@@ -83,13 +83,13 @@ public class AnnouncementConsumer {
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
 
-    public void announce(Announcement announcement) {
+    public void create(Announcement announcement) {
         restTemplate.postForEntity(URL, announcement, Announcement.class);
     }
-    public void deleteAnnouncement(Announcement announcement) {
+    public void delete(Announcement announcement) {
         restTemplate.delete(URL, announcement, Announcement.class);
     }
-    public void modifyAnnouncement(Announcement announcement){
+    public void edit(Announcement announcement){
         restTemplate.put(URL, announcement, Announcement.class);
     }
 
