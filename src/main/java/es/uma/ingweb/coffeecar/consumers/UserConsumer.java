@@ -15,6 +15,7 @@ import java.util.Objects;
 
 @Component
 public class UserConsumer {
+    private static final String URL = "http://localhost:8080/users";
     private static final String GET_ALL_USERS_URL = "http://localhost:8080/users";
 
     @Autowired
@@ -26,6 +27,16 @@ public class UserConsumer {
                     getParameterizedTypeReference()
                     );
         return new ArrayList<>(Objects.requireNonNull(usersResponse.getBody()).getContent());
+    }
+
+    private void createUser(User user){
+        restTemplate.postForEntity(URL, user, User.class);
+    }
+    private void modifyUser(User user){
+        restTemplate.put(URL, user, User.class);
+    }
+    private void deleteUser(User user){
+        restTemplate.delete(URL, user, User.class);
     }
 
     private static ParameterizedTypeReference<PagedModel<User>> getParameterizedTypeReference() {

@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 public class AnnouncementConsumer {
+    private static final String URL ="http://localhost:8080/announced";
     private static final String GET_ALL_ANNOUNCEMENTS_URL =
             "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNotContaining{user}";
     private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL =
@@ -82,6 +83,15 @@ public class AnnouncementConsumer {
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
 
+    public void announce(Announcement announcement) {
+        restTemplate.postForEntity(URL, announcement, Announcement.class);
+    }
+    public void deleteAnnouncement(Announcement announcement) {
+        restTemplate.delete(URL, announcement, Announcement.class);
+    }
+    public void modifyAnnouncement(Announcement announcement){
+        restTemplate.put(URL, announcement, Announcement.class);
+    }
 
     private static ParameterizedTypeReference<PagedModel<Announcement>> getParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {};
