@@ -9,27 +9,79 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class AnnouncementConsumer {
-    private static final String GET_ALL_ANNOUNCEMENTS_URL = "http://localhost:8080/announced";
-    private static final String GET_MY_ANNOUNCEMENTS_URL = "http://localhost:8080/announced/search";
+    private static final String GET_ALL_ANNOUNCEMENTS_URL =
+            "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNotContaining{user}";
+    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL =
+            "http://localhost:8080/announced/search/findAnnouncesByDriver{driver}";
+    private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL =
+            "http://localhost:8080/announced/search/findAnnouncesByPassengers{passengers}";
+    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL =
+            "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrival}";
+    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL =
+            "http://localhost:8080/announced/search/findAnnouncesByArrival{arrival}";
 
     @Autowired
     private RestTemplate restTemplate;
 
-    public List<Announcement> getAll(){
+    public List<Announcement> getAll(User user){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         GET_ALL_ANNOUNCEMENTS_URL,
                         HttpMethod.GET,
                         null,
-                        getParameterizedTypeReference()
+                        getParameterizedTypeReference(),
+                        Map.of("user", user)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
+    public List<Announcement> getByDriver(User user){
+        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+                restTemplate.exchange(
+                        GET_ANNOUNCEMENTS_BY_DRIVER_URL,
+                        HttpMethod.GET,
+                        null,
+                        getParameterizedTypeReference(),
+                        Map.of("driver", user)
+                );
+        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+    }
+    public List<Announcement> getByPassenger(User user){
+        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+                restTemplate.exchange(
+                        GET_ANNOUNCEMENTS_BY_PASSANGER_URL,
+                        HttpMethod.GET,
+                        null,
+                        getParameterizedTypeReference(),
+                        Map.of("passengers", user)
+                );
+        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+    }
+    public List<Announcement> getByArrivalDate(User user){
+        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+                restTemplate.exchange(
+                        GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL,
+                        HttpMethod.GET,
+                        null,
+                        getParameterizedTypeReference(),
+                        Map.of("arrival", user)
+                );
+        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+    }
+    public List<Announcement> getByArrival(User user){
+        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+                restTemplate.exchange(
+                        GET_ANNOUNCEMETS_BY_ARRIVAL_URL,
+                        HttpMethod.GET,
+                        null,
+                        getParameterizedTypeReference(),
+                        Map.of("arrival", user)
+                );
+        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+    }
+
 
     private static ParameterizedTypeReference<PagedModel<Announcement>> getParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {};
