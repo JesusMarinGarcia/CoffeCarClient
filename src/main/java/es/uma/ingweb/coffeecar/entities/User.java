@@ -14,8 +14,8 @@ public class User {
     private String mail;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Announce> ownedAnnounces;
+    private List<Announcement> ownedAnnouncements;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Announce> joinedAnnounces;
+    private List<Announcement> joinedAnnouncements;
 }

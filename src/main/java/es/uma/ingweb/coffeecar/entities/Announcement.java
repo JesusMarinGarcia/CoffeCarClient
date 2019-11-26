@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Announce {
+public class Announcement {
     private long id;
     private String title;
     private Date departureTime;
