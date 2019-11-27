@@ -17,6 +17,8 @@ public class Announcement {
     private Date arrivalDate;
     private String description;
     private String arrival;
+    private long arrivalLatitude;
+    private long arrivalLongitude;
     private String departure;
     private int seats;
     private User driver;
