@@ -13,16 +13,11 @@ import java.util.*;
 
 public class AnnouncementConsumer {
     private static final String URL ="http://localhost:8080/announced";
-    private static final String GET_ALL_ANNOUNCEMENTS_URL =
-            "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNotContaining{user}";
-    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL =
-            "http://localhost:8080/announced/search/findAnnouncesByDriver{driver}";
-    private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL =
-            "http://localhost:8080/announced/search/findAnnouncesByPassengers{passengers}";
-    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL =
-            "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrival}";
-    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL =
-            "http://localhost:8080/announced/search/findAnnouncesByArrival{arrival}";
+    private static final String GET_ALL_ANNOUNCEMENTS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNotContaining{user}";
+    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver{driver}";
+    private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers{passengers}";
+    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrival}";
+    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival{arrival}";
 
     @Autowired
     private RestTemplate restTemplate;
