@@ -1,6 +1,7 @@
 package es.uma.ingweb.coffeecar.consumers;
 
 import es.uma.ingweb.coffeecar.entities.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
@@ -14,20 +15,28 @@ import java.util.Objects;
 
 @Component
 public class UserConsumer {
+    private static final String URL = "http://localhost:8080/users";
     private static final String GET_ALL_USERS_URL = "http://localhost:8080/users";
 
-    private final RestTemplate template;
-
-    public UserConsumer(RestTemplate template) {
-        this.template = template;
-    }
+    @Autowired
+    private RestTemplate restTemplate;
 
     public List<User> getAll() {
-        final ResponseEntity<PagedModel<User>> usersResponse = template
+        final ResponseEntity<PagedModel<User>> usersResponse = restTemplate
               .exchange(GET_ALL_USERS_URL, HttpMethod.GET, null,
                     getParameterizedTypeReference()
                     );
         return new ArrayList<>(Objects.requireNonNull(usersResponse.getBody()).getContent());
+    }
+
+    private void create(User user){
+        restTemplate.postForEntity(URL, user, User.class);
+    }
+    private void edit(User user){
+        restTemplate.put(URL, user, User.class);
+    }
+    private void delete(User user){
+        restTemplate.delete(URL, user, User.class);
     }
 
     private static ParameterizedTypeReference<PagedModel<User>> getParameterizedTypeReference() {

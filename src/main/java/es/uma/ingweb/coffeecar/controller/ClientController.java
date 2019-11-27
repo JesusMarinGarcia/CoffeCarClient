@@ -6,19 +6,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class ClientController {
 
-    @RequestMapping("/index")
-    public String index(){
+    @RequestMapping("/index")                       //Inicio
+    public String index(){return "index";}
 
-        return "index";
+    @RequestMapping(value = "/announce")            //Crear anuncio
+    public String announce(){
+        return "announce";
     }
 
-    @RequestMapping(value = "/createAnnoucement")
-    public String createAnnoucement(){
-        return "createAnnoucement";
-    }
-
-    @RequestMapping(value = "/annoucement")
-    public String annoucementDetails(){
+    @RequestMapping(value = "/annoucement")         //Detalles de un anuncio
+    public String annoucement(){
         return "annoucement";
     }
 }
