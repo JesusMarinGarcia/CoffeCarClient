@@ -22,6 +22,7 @@ public class Announcement {
     private String departure;
     private double departureLatitude;
     private double getDepartureLongitude;
+    private String imgLink;
     private int seats;
     private User driver;
     private List<User> passengers;
