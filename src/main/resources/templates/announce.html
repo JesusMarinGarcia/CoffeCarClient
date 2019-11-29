@@ -63,8 +63,6 @@
                     $.ajax(settings).done(function(response) {
                         console.log(response);
                         document.getElementById('link').value = JSON.parse(response).data.link;
-                        document.getElementById('deleteHash').value = JSON.parse(response).data.deletehash;
-                        console.log(response.data.link);
                     });
 
                 }
@@ -96,9 +94,6 @@
 <br>
 <form id="imgur">
 
-
-
-
     <div class="nav justify-content-center" style="padding-top: 1%">
         <div class="custom-file" style="max-width: 20%; min-width: 200px">
             <input type="file" class="custom-file-input imgur" id="foto" accept="image/png, .jpeg, .jpg" name="foto" data-max-size="5000" />
@@ -110,15 +105,23 @@
 <form id="crearAnuncio">
 
     <input type="hidden" id="link" value="" />
-    <input type="hidden" id="deleteHash" value="" />
 
     <div class="nav justify-content-center" style="padding-top: 2%">
-        <div class="input-group" style="max-width: 22%">
+        <div class="input-group" style="max-width: 20%">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Título</span>
+            </div>
+            <input type="text" class="form-control" aria-label="With textarea" id="title"/>
+        </div>
+    </div>
+
+    <div class="nav justify-content-center" style="padding-top: 2%">
+        <div class="input-group" style="max-width: 20%">
             <div class="input-group-prepend">
                 <span class="input-group-text">Asientos:</span>
                 <span style="min-width: 42px" class="input-group-text" id="nasientos"></span>
             </div>
-                <input style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
+            <input style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
 
         </div>
     </div>
