@@ -19,7 +19,6 @@ public class Announcement {
     private String arrival;
     private double arrivalLatitude;
     private double arrivalLongitude;
-    private String departure;
     private double departureLatitude;
     private double getDepartureLongitude;
     private String imgLink;
