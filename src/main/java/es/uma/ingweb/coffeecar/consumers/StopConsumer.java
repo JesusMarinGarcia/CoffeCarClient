@@ -7,12 +7,15 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Service
 public class StopConsumer {
     private static final String GET_ALL_STOP= "http://localhost:8080/getStops/all";
     private static final String GET_ALL_NEARBY_STOPS = "http://localhost:8080/getStops/near?";
