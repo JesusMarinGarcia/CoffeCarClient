@@ -1,8 +1,8 @@
 package es.uma.ingweb.coffeecar.controller;
 
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ClientController {
@@ -14,7 +14,8 @@ public class ClientController {
     }
 
     @RequestMapping(value = "/crearAnuncio")
-    public String anuncios(){
+    public String anuncios(OAuth2AuthenticationToken auth2AuthenticationToken){
+        System.out.println(auth2AuthenticationToken.getPrincipal().getAttributes());
         return "crearAnuncio";
     }
 }
