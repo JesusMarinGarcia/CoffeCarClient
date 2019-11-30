@@ -14,6 +14,11 @@
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
 
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+
+
+
     <title>Anuncio</title>
 </head>
 <body>
@@ -87,6 +92,7 @@
     <input type="hidden" id="longOrigen" name="longOrigen" value=""/>
     <input type="hidden" id="latDestino" name="latDestino" value=""/>
     <input type="hidden" id="longDestino" name="longDestino" value=""/>
+    <input type="hidden" id="arrival" name="arrival" value=""/>
 
 
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
@@ -128,8 +134,6 @@
         trackUserLocation: true
     }));
 
-
-
     var str, strLatOri, strLongOri;
 
     var marker = new mapboxgl.Marker({
@@ -137,6 +141,7 @@
     })
         .setLngLat([-4.42034, 36.72016])
         .addTo(map);
+
 
     map.on('click', function(e) {
         str = JSON.stringify(e.lngLat);
@@ -187,6 +192,7 @@
         trackUserLocation: true
     }));
 
+    var xhReq = new XMLHttpRequest();
 
     var strDes, strLatDes, strLongDes;
 
@@ -198,27 +204,37 @@
 
     mapDes.on('click', function(e) {
         strDes = JSON.stringify(e.lngLat);
-        coordArray = strDes.split(",");
-        strLongDes = coordArray[0].slice(7);
-        strLatDes = coordArray[1].slice(6,-1);
+        coordArrayDes = strDes.split(",");
+        strLongDes = coordArrayDes[0].slice(7);
+        strLatDes = coordArrayDes[1].slice(6,-1);
         document.getElementById('latDestino').value = strLatDes;
         document.getElementById('longDestino').value= strLongDes;
         markerDes
             .setLngLat(e.lngLat)
             .addTo(mapDes);
-    });
 
-    function onDragEnd() {
-        var lngLatDes = markerDes.getLngLat();
-        strDes = JSON.stringify(lngLatDes);
-        coordArray = str.split(",");
-        strLongDes = coordArray[0].slice(7);
-        strLatOri = coordArray[1].slice(6,-1);
-        document.getElementById('latDestino').value = strLatDes;
-        document.getElementById('longDestino').value= strLongDes;
+        safeAddress(strLatDes,strLongDes);
+    });
+    
+    function safeAddress(lat,lng) {
+        xhReq.open("GET","https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lng + "&zoom=8&addressdetails=1",false)
+        xhReq.send(null);
+        var jsonObject = JSON.parse(xhReq.responseText);
+        document.getElementById('arrival').value= jsonObject.display_name;
     }
 
-    markerDes.on('dragend', onDragEnd);
+    function onDragEndDes() {
+        var lngLatDes = markerDes.getLngLat();
+        strDes = JSON.stringify(lngLatDes);
+        coordArrayDes = strDes.split(",");
+        strLongDes = coordArrayDes[0].slice(7);
+        strLatDes = coordArrayDes[1].slice(6,-1);
+        document.getElementById('latDestino').value = strLatDes;
+        document.getElementById('longDestino').value= strLongDes;
+        safeAddress(strLatDes,strLongDes);
+    }
+
+    markerDes.on('dragend', onDragEndDes);
 
 </script>
 
