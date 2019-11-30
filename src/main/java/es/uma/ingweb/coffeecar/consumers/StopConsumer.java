@@ -1,7 +1,7 @@
 package es.uma.ingweb.coffeecar.consumers;
 
 import es.uma.ingweb.coffeecar.entities.Bus;
-import javafx.scene.paint.Stop;
+import es.uma.ingweb.coffeecar.entities.BusStop;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
@@ -23,16 +23,16 @@ public class StopConsumer {
     @Autowired
     private RestTemplate restTemplate;
 
-    public List<Stop> getAll() {
-        final ResponseEntity<PagedModel<Stop>> stopResponse = restTemplate
+    public List<BusStop> getAll() {
+        final ResponseEntity<PagedModel<BusStop>> stopResponse = restTemplate
                 .exchange(GET_ALL_STOP, HttpMethod.GET, null,
                         getParameterizedTypeReference()
                 );
         return new ArrayList<>(Objects.requireNonNull(stopResponse.getBody()).getContent());
     }
 
-    public List<Stop> getNearby(float lat, float lon) {
-        final ResponseEntity<PagedModel<Stop>> stopResponse = restTemplate
+    public List<BusStop> getNearby(float lat, float lon) {
+        final ResponseEntity<PagedModel<BusStop>> stopResponse = restTemplate
                 .exchange(GET_ALL_NEARBY_STOPS.concat("lat=" + lat + "&lon="+ lon),
                         HttpMethod.GET, null,
                         getParameterizedTypeReference()
@@ -40,7 +40,7 @@ public class StopConsumer {
         return new ArrayList<>(Objects.requireNonNull(stopResponse.getBody()).getContent());
     }
 
-    private static ParameterizedTypeReference<PagedModel<Stop>> getParameterizedTypeReference() {
+    private static ParameterizedTypeReference<PagedModel<BusStop>> getParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {};
     }
 }
