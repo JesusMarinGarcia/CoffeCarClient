@@ -29,7 +29,7 @@ public class BusCosumer {
 
     public List<Bus> getByLine(int codLine) {
         final ResponseEntity<PagedModel<Bus>> busResponse = restTemplate
-                .exchange(GET_ALL_BUSES_CURRENT_POS.concat(String.valueOf(codLine)), HttpMethod.GET, null,
+                .exchange(GET_ALL_BUSES_CURRENT_POS_BY_LINE.concat(String.valueOf(codLine)), HttpMethod.GET, null,
                         getParameterizedTypeReference()
                 );
         return new ArrayList<>(Objects.requireNonNull(busResponse.getBody()).getContent());
