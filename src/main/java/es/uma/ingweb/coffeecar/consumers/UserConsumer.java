@@ -28,6 +28,9 @@ public class UserConsumer {
                     );
         return new ArrayList<>(Objects.requireNonNull(usersResponse.getBody()).getContent());
     }
+    public User getByID(int id){
+
+    }
 
     private void create(User user){
         restTemplate.postForEntity(URL, user, User.class);
