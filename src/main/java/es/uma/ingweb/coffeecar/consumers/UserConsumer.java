@@ -7,13 +7,14 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Component
+@Service
 public class UserConsumer {
     private static final String URL = "http://localhost:8080/users";
     private static final String GET_ALL_USERS_URL = "http://localhost:8080/users";

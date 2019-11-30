@@ -3,14 +3,18 @@ package es.uma.ingweb.coffeecar.consumers;
 import es.uma.ingweb.coffeecar.entities.Announcement;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
+@Service
 public class AnnouncementConsumer {
     private static final String URL ="http://localhost:8080/announced";
     private static final String GET_ANNOUNCEMENTS_EXCEPT_USER_SUBSCRIBED_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNotContaining{user}";

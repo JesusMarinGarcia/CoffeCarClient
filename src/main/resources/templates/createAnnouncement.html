@@ -12,12 +12,63 @@
 
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 
 
 
+    <script>
+        $("document").ready(function() {
+
+            $('input[type=file]').on("change", function() {
+
+                var $files = $(this).get(0).files;
+
+                if ($files.length) {
+
+                    // Reject big files
+                    if ($files[0].size > $(this).data("max-size") * 1024) {
+                        console.log("Please select a smaller file");
+                        return false;
+                    }
+
+                    // Begin file upload
+                    console.log("Uploading file to Imgur..");
+
+                    // Replace ctrlq with your own API key
+                    var apiUrl = 'https://api.imgur.com/3/image';
+                    var apiKey = 'c4853e7aac75f3d';
+
+                    var settings = {
+                        async: false,
+                        crossDomain: true,
+                        processData: false,
+                        contentType: false,
+                        type: 'POST',
+                        url: apiUrl,
+                        headers: {
+                            Authorization: 'Client-ID ' + apiKey,
+                            Accept: 'application/json'
+                        },
+                        mimeType: 'multipart/form-data'
+                    };
+
+                    var formData = new FormData();
+                    formData.append("image", $files[0]);
+                    settings.data = formData;
+
+                    // Response contains stringified JSON
+                    // Image URL available at response.data.link
+                    $.ajax(settings).done(function(response) {
+                        console.log(response);
+                        document.getElementById('link').value = JSON.parse(response).data.link;
+                    });
+
+                }
+            });
+        });
+    </script>
 
     <title>Anuncio</title>
 </head>
@@ -41,14 +92,27 @@
     </div>
 </nav>
 <br>
-<form id="crearAnuncio">
+<form id="imgur">
 
     <div class="nav justify-content-center" style="padding-top: 1%">
         <div class="custom-file" style="max-width: 20%; min-width: 200px">
-            <input type="file" class="custom-file-input" id="inputGroupFile01" name="foto">
-            <label class="custom-file-label" for="inputGroupFile01">Elige una foto</label>
+            <input type="file" class="custom-file-input imgur" id="foto" accept="image/png, .jpeg, .jpg" name="foto" data-max-size="5000" />
+            <label class="custom-file-label" for="foto">Elige una foto</label>
         </div>
 
+    </div>
+</form>
+<form id="crearAnuncio">
+
+    <input type="hidden" id="link" value="" />
+
+    <div class="nav justify-content-center" style="padding-top: 2%">
+        <div class="input-group" style="max-width: 20%">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Título</span>
+            </div>
+            <input type="text" class="form-control" aria-label="With textarea" id="title"/>
+        </div>
     </div>
 
     <div class="nav justify-content-center" style="padding-top: 2%">
@@ -57,7 +121,7 @@
                 <span class="input-group-text">Asientos:</span>
                 <span style="min-width: 42px" class="input-group-text" id="nasientos"></span>
             </div>
-                <input style="width: 55%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
+            <input style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
 
         </div>
     </div>
@@ -67,13 +131,13 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Fecha salida</span>
             </div>
-            <input type="datetime-local" name="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+            <input type="datetime-local" ,id="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
         </div>
         <div class="input-group input-group mb-3" style="width: 350px; margin-left: 20px">
             <div class="input-group-prepend">
                 <span class="input-group-text">Fecha llegada</span>
             </div>
-            <input type="datetime-local" name="fechaLLegada"  class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+            <input type="datetime-local" id="fechaLlegada"  class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
         </div>
     </div>
 
@@ -82,7 +146,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Breve descripción</span>
             </div>
-            <textarea class="form-control" aria-label="With textarea" name="descripcion"></textarea>
+            <textarea class="form-control" aria-label="With textarea" id="descripcion"></textarea>
         </div>
     </div>
 
@@ -248,15 +312,9 @@
 </form>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<script>
-    var slider = new Slider("#ex6");
-    slider.on("slide", function(sliderValue) {
-        document.getElementById("ex6SliderVal").textContent = sliderValue;
-    });
-</script>
+
 
 <script>
     var slider = document.getElementById("asientos");
