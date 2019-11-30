@@ -5,6 +5,7 @@ import es.uma.ingweb.coffeecar.consumers.BusConsumer;
 import es.uma.ingweb.coffeecar.consumers.StopConsumer;
 import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -24,7 +25,6 @@ public class ClientController {
     public String index(){
         return "index";
     }
-
     @GetMapping("/createAnnouncement")
     public String createAnnouncement(){
         return "createAnnouncement";
@@ -33,5 +33,10 @@ public class ClientController {
     @GetMapping("/announcementDetails")
     public String announcementDetails(){
         return "announcementDetails";
+    }
+    @RequestMapping(value = "/annoucement")         //Detalles de un anuncio
+    public String annoucement(OAuth2AuthenticationToken auth2AuthenticationToken){
+        System.out.println(auth2AuthenticationToken.getPrincipal().getAttributes());
+        return "annoucement";
     }
 }
