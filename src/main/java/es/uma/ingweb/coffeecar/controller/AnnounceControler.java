@@ -42,6 +42,16 @@ public class AnnounceControler {
         announcement.setDepartureTime(departureTime);
         announcement.setArrivalDate(arrivalTime);
         announcementConsumer.create(announcement);
-        return "index";
+        return "";
+    }
+
+    @GetMapping("/createAnnouncement")
+    public String createAnnouncement(){
+        return "createAnnouncement";
+    }
+
+    @GetMapping("/announcementDetails")
+    public String announcementDetails(@RequestParam(name="announcementId") long id){
+        return "announcementDetails";
     }
 }
