@@ -9,14 +9,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import java.util.List;
+
 @Controller
 public class HomePageController {
     @Autowired
     private AnnouncementConsumer announcementConsumer;
 
-    @GetMapping("/home")
+    @GetMapping("/")
     public String home(@SessionAttribute("user") User user, Model model ){
-        model.addAttribute("availableAnnouncements",announcementConsumer.getAvailableAnnouncements(user));
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
         model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
         return "/home";
     }

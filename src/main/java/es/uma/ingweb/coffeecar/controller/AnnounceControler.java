@@ -52,7 +52,7 @@ public class AnnounceControler {
         announcement.setDriver(user);
         announcement.setPassengers(new ArrayList<>());
         announcementConsumer.create(announcement);
-        return "home";
+        return "";
     }
 
     @GetMapping("/createAnnouncement")
@@ -61,7 +61,7 @@ public class AnnounceControler {
     }
 
     @GetMapping("/announcementDetails")
-    public String announcementDetails(){
+    public String announcementDetails(@RequestParam(name="announcementId") long id){
         return "announcementDetails";
     }
 }
