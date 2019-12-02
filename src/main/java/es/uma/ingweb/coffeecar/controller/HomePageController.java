@@ -18,8 +18,8 @@ public class HomePageController {
 
     @GetMapping("/")
     public String home(@SessionAttribute("user") User user, Model model ){
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user.getMail()));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user.getMail()));
         return "/home";
     }
 }

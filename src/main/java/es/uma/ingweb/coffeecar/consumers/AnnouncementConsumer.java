@@ -17,8 +17,8 @@ import java.util.*;
 @Service
 public class AnnouncementConsumer {
     private static final String URL ="http://localhost:8080/announced";
-    private static final String GET_AVAILABLE_ANNOUNCEMETS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNotContaining{user}";
-    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver{driver}";
+    private static final String GET_AVAILABLE_ANNOUNCEMETS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNot{user}";
+    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver_Mail{driver}";
     private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers{passengers}";
     private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrival}";
     private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival{arrival}";
@@ -26,42 +26,42 @@ public class AnnouncementConsumer {
     @Autowired
     private RestTemplate restTemplate;
 
-    public List<Announcement> getAvailableAnnouncements(User user){
+    public List<Announcement> getAvailableAnnouncements(String mail){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         GET_AVAILABLE_ANNOUNCEMETS_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("user", user)
+                        Map.of("user", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
-    public List<Announcement> getByDriver(User user){
+    public List<Announcement> getByDriver(String mail){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         GET_ANNOUNCEMENTS_BY_DRIVER_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("driver", user)
+                        Map.of("driver", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
-    public List<Announcement> getByPassenger(User user){
+    public List<Announcement> getByPassenger(String mail){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         GET_ANNOUNCEMENTS_BY_PASSANGER_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("passengers", user)
+                        Map.of("passengers", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
-    public List<Announcement> getMyTrips(User user){
-        List<Announcement> allMyTrips = getByDriver(user);
-        allMyTrips.addAll(getByPassenger(user));
+    public List<Announcement> getMyTrips(String mail){
+        List<Announcement> allMyTrips = getByDriver(mail);
+        allMyTrips.addAll(getByPassenger(mail));
         return sortByDepartureDate(allMyTrips);
 
     }
@@ -74,25 +74,25 @@ public class AnnouncementConsumer {
         });
         return announcementList;
     }
-    public List<Announcement> getByArrivalDate(User user){
+    public List<Announcement> getByArrivalDate(String mail){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("arrival", user)
+                        Map.of("arrival", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
-    public List<Announcement> getByArrival(User user){
+    public List<Announcement> getByArrival(String mail){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         GET_ANNOUNCEMETS_BY_ARRIVAL_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("arrival", user)
+                        Map.of("arrival", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
