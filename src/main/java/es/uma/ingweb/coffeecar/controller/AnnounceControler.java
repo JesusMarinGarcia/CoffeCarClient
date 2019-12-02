@@ -38,7 +38,7 @@ public class AnnounceControler {
         announcement.setTitle(title);
         announcement.setSeats(seats);
         announcement.setImgLink(link);
-        if (desc.isEmpty() || desc == null){
+        if (desc == null || desc.isEmpty()){
             announcement.setDescription("No hay descripción");
         }else{
             announcement.setDescription(desc);
