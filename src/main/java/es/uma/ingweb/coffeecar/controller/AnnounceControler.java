@@ -5,6 +5,7 @@ import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
 import es.uma.ingweb.coffeecar.entities.Announcement;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,7 +39,7 @@ public class AnnounceControler {
         announcement.setTitle(title);
         announcement.setSeats(seats);
         announcement.setImgLink(link);
-        if (desc.isEmpty() || desc == null){
+        if (desc == null || desc.isEmpty()){
             announcement.setDescription("No hay descripción");
         }else{
             announcement.setDescription(desc);
@@ -61,7 +62,9 @@ public class AnnounceControler {
     }
 
     @GetMapping("/announcementDetails")
-    public String announcementDetails(@RequestParam(name="announcementId") long id){
+    public String announcementDetails(@RequestParam(name="announcementId") long id, Model model){
+        AnnouncementConsumer announcementConsumer = new AnnouncementConsumer();
+        model.addAttribute("announcement",announcementConsumer.getById(id));
         return "announcementDetails";
     }
 }

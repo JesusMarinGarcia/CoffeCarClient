@@ -22,6 +22,7 @@ public class AnnouncementConsumer {
     private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers{mail}";
     private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrivalDate}";
     private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival{arrival}";
+    private static final String GET_ANNOUNCEMENT_BY_ID = "http://localhost:8080/announced/search/findAnnounceById{id}";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -95,6 +96,14 @@ public class AnnouncementConsumer {
                         Map.of("arrival", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+    }
+
+    public Announcement getById(long id){
+        ResponseEntity<Announcement> a = restTemplate
+                .getForEntity(
+                        GET_ANNOUNCEMENT_BY_ID.concat("?id="+id), Announcement.class
+                );
+        return a.getBody();
     }
 
     public void create(Announcement announcement) {
