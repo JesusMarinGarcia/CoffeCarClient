@@ -17,10 +17,10 @@ import java.util.*;
 @Service
 public class AnnouncementConsumer {
     private static final String URL ="http://localhost:8080/announced";
-    private static final String GET_AVAILABLE_ANNOUNCEMETS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNot{user}";
-    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver_Mail{driver}";
-    private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers{passengers}";
-    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrival}";
+    private static final String GET_AVAILABLE_ANNOUNCEMETS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNot{mail}";
+    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver_Mail{mail}";
+    private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers{mail}";
+    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrivalDate}";
     private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival{arrival}";
 
     @Autowired
@@ -33,7 +33,7 @@ public class AnnouncementConsumer {
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("user", mail)
+                        Map.of("mail", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
@@ -44,7 +44,7 @@ public class AnnouncementConsumer {
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("driver", mail)
+                        Map.of("mail", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
@@ -55,7 +55,7 @@ public class AnnouncementConsumer {
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("passengers", mail)
+                        Map.of("mail", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
@@ -81,7 +81,7 @@ public class AnnouncementConsumer {
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("arrival", mail)
+                        Map.of("arrivalDate", mail)
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
