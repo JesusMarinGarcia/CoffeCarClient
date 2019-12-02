@@ -14,15 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 @Controller
-@SessionAttributes("user")
 public class UserController {
     @Autowired
     private UserConsumer userConsumer;
-
-    @ModelAttribute("user")
-    public User setUpUser(OAuth2AuthenticationToken auth2AuthenticationToken){
-        return userConsumer.getByEmail(auth2AuthenticationToken.getPrincipal().getAttribute("email"));
-    }
 
     @GetMapping("/profile")
     public String profile(){

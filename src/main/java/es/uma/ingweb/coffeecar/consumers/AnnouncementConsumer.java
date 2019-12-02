@@ -17,11 +17,11 @@ import java.util.*;
 @Service
 public class AnnouncementConsumer {
     private static final String URL ="http://localhost:8080/announced";
-    private static final String GET_AVAILABLE_ANNOUNCEMETS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNot{mail}";
+    private static final String GET_AVAILABLE_ANNOUNCEMENTS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNot{mail}";
     private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver_Mail{mail}";
-    private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers{mail}";
-    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrivalDate}";
-    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival{arrival}";
+    private static final String  GET_ANNOUNCEMENTS_BY_PASSENGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers{mail}";
+    private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrivalDate}";
+    private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival{arrival}";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -29,7 +29,7 @@ public class AnnouncementConsumer {
     public List<Announcement> getAvailableAnnouncements(String mail){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
-                        GET_AVAILABLE_ANNOUNCEMETS_URL,
+                        GET_AVAILABLE_ANNOUNCEMENTS_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
@@ -51,7 +51,7 @@ public class AnnouncementConsumer {
     public List<Announcement> getByPassenger(String mail){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
-                        GET_ANNOUNCEMENTS_BY_PASSANGER_URL,
+                        GET_ANNOUNCEMENTS_BY_PASSENGER_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
@@ -77,7 +77,7 @@ public class AnnouncementConsumer {
     public List<Announcement> getByArrivalDate(String mail){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
-                        GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL,
+                        GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
@@ -88,7 +88,7 @@ public class AnnouncementConsumer {
     public List<Announcement> getByArrival(String mail){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
-                        GET_ANNOUNCEMETS_BY_ARRIVAL_URL,
+                        GET_ANNOUNCEMENTS_BY_ARRIVAL_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
