@@ -17,7 +17,7 @@ import java.util.ArrayList;
 @Controller
 public class AnnounceControler {
 
-    @PostMapping("/announce/create")
+    @PostMapping("createAnnouncement/confirm")
     public String announce(
             @RequestParam(name = "title", required = true) String title,
             @RequestParam(name = "asientos", required = true) Integer seats,
