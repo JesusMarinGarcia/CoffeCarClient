@@ -1,6 +1,7 @@
 package es.uma.ingweb.coffeecar.controller;
 
 import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
+import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -8,20 +9,41 @@ import org.springframework.security.oauth2.core.http.converter.OAuth2AccessToken
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
-import org.springframework.web.bind.annotation.SessionAttributes;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Controller
 public class HomePageController {
-    @Autowired
-    private AnnouncementConsumer announcementConsumer;
+    private final AnnouncementConsumer announcementConsumer;
+    private final UserConsumer userConsumer;
 
-    @GetMapping("/home")
-    public String home(OAuth2AuthenticationToken token, Model model ){
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(token.getPrincipal().getAttribute("email")));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(token.getPrincipal().getAttribute("email")));
+    public HomePageController(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer) {
+        this.announcementConsumer = announcementConsumer;
+        this.userConsumer = userConsumer;
+    }
+
+    @GetMapping("/")
+    public String home(OAuth2AuthenticationToken authenticationToken, Model model) {
+        String email = authenticationToken.getPrincipal().getAttribute("email");
+        String name = authenticationToken.getPrincipal().getAttribute("name");
+        User user = Optional.ofNullable(userConsumer.getByEmail(email))
+              .orElse(createUser(email, name));
+
+        userConsumer.create(user);
+/*
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(email));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
+*/
         return "/home";
+    }
+
+    private User createUser(String email, String name) {
+        User user = User.builder()
+              .mail(email)
+              .name(name)
+              .build();
+        userConsumer.create(user);
+        return user;
     }
 }
