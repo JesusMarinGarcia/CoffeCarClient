@@ -13,6 +13,9 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
 
+    <script src='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.css' rel='stylesheet' />
+
     <style>
         .lbl{
             margin-top: 7%;
@@ -41,8 +44,8 @@
 </nav>
 <br>
 
-<div class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%">
-    <img th:src="@{CoffeeCarLogo.png}" src="../static/CoffeeCarLogo.png" alt="..." style="max-width: 35%">
+<div class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; height: 350px">
+    <img th:src="@{CoffeeCarLogo.png}" src="../static/CoffeeCarLogo.png" alt="..." style="max-width: 100%; max-height: 100%">
 </div>
 <div class="container-fluid text-center" style="padding-left: 5%; padding-right: 5%">
         <h1>Título</h1>
@@ -89,35 +92,26 @@
 </div>
 <br>
 <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [-4.42034, 36.72016],
-        zoom: 11
-    });
+    L.mapbox.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
+    var map = L.mapbox.map('map')
+        .setView([36.72016, -4.42034], 12)
+        .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
-    map.addControl(new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl
-    }));
+    L.marker([36.72016, -4.45134], {
+        icon: L.mapbox.marker.icon({
+            'marker-size': 'large',
+            'marker-symbol': 'car',
+            'marker-color': '#3ab3da'
+        })
+    }).addTo(map);
 
-    map.addControl(new mapboxgl.NavigationControl());
-
-    map.addControl(new mapboxgl.GeolocateControl({
-        positionOptions: {
-            enableHighAccuracy: true
-        },
-        trackUserLocation: true
-    }));
-
-
-    var marker = new mapboxgl.Marker({
-    })
-        .setLngLat([-4.42034, 36.72016])
-        .addTo(map);
-
-
+    L.marker([36.75016, -4.42034], {
+        icon: L.mapbox.marker.icon({
+            'marker-size': 'small',
+            'marker-symbol': 'bus',
+            'marker-color': '#FF3633'
+        })
+    }).addTo(map);
 </script>
 
 <script>
@@ -155,11 +149,7 @@
 
 </script>
 
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
 
 
 </body>
