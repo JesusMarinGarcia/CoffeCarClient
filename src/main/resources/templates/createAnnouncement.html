@@ -102,16 +102,16 @@
 
     </div>
 </form>
-<form id="crearAnuncio" method="POST" th:action="@{createAnnouncement/confirm}">
+<form id="crearAnuncio" action="createAnnouncement/confirm" method="POST" th:action="@{createAnnouncement/confirm}" th:object="${anuncio}">
 
-    <input type="hidden" id="link" value="" />
+    <input type="hidden" id="link" value="" th:fiel="*{imgLink}"/>
 
     <div class="nav justify-content-center" style="padding-top: 2%">
         <div class="input-group" style="max-width: 20%">
             <div class="input-group-prepend">
                 <span class="input-group-text">Título</span>
             </div>
-            <input type="text" class="form-control" aria-label="With textarea" id="title" th:id="title"/>
+            <input th:field="*{title}" type="text" class="form-control" aria-label="With textarea" id="title"/>
         </div>
     </div>
 
@@ -121,7 +121,7 @@
                 <span class="input-group-text">Asientos:</span>
                 <span style="min-width: 42px" class="input-group-text" id="nasientos"></span>
             </div>
-            <input style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
+            <input th:fiel="*{seats}" style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
 
         </div>
     </div>
@@ -130,13 +130,13 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Fecha salida</span>
             </div>
-            <input type="datetime-local" value="2019-01-01T12:00" id="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+            <input type="datetime-local" name="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
         </div>
         <div class="input-group input-group mb-3" style="width: 350px; margin-left: 20px">
             <div class="input-group-prepend">
                 <span class="input-group-text">Fecha llegada</span>
             </div>
-            <input type="datetime-local" value="2018-06-12T12:00" id="fechaLlegada"  class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+            <input type="datetime-local" name="fechaLlegada" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
         </div>
     </div>
 
@@ -145,17 +145,17 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Breve descripción</span>
             </div>
-            <textarea class="form-control" aria-label="With textarea" id="descripcion"></textarea>
+            <textarea th:field="*{description}" class="form-control" aria-label="With textarea" id="descripcion"></textarea>
         </div>
     </div>
 
 
     <br>
-    <input type="hidden" id="latOrigen" name="latOrigen" value=""/>
-    <input type="hidden" id="longOrigen" name="longOrigen" value=""/>
-    <input type="hidden" id="latDestino" name="latDestino" value=""/>
-    <input type="hidden" id="longDestino" name="longDestino" value=""/>
-    <input type="hidden" id="arrival" name="arrival" value=""/>
+    <input th:field="*{departureLatitude}" type="hidden" id="latOrigen" name="latOrigen" value=""/>
+    <input th:field="*{getDepartureLongitude}" type="hidden" id="longOrigen" name="longOrigen" value=""/>
+    <input th:field="*{arrivalLatitude}" type="hidden" id="latDestino" name="latDestino" value=""/>
+    <input th:field="*{arrivalLongitude}" type="hidden" id="longDestino" name="longDestino" value=""/>
+    <input th:field="*{arrival}" type="hidden" id="arrival" name="arrival" value=""/>
 
 
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
