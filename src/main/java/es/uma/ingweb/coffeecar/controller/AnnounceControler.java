@@ -17,7 +17,7 @@ import java.util.ArrayList;
 @Controller
 public class AnnounceControler {
 
-    @PostMapping("/announce/create")
+    @PostMapping("createAnnouncement/confirm")
     public String announce(
             @RequestParam(name = "title", required = true) String title,
             @RequestParam(name = "asientos", required = true) Integer seats,
@@ -38,7 +38,7 @@ public class AnnounceControler {
         announcement.setTitle(title);
         announcement.setSeats(seats);
         announcement.setImgLink(link);
-        if (desc.isEmpty() || desc == null){
+        if (desc == null || desc.isEmpty()){
             announcement.setDescription("No hay descripción");
         }else{
             announcement.setDescription(desc);
