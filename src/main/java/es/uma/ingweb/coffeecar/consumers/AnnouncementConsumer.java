@@ -12,16 +12,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 public class AnnouncementConsumer {
     private static final String URL ="http://localhost:8080/announced";
-    private static final String GET_AVAILABLE_ANNOUNCEMETS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNot{mail}";
-    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver_Mail{mail}";
-    private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers{mail}";
-    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate{arrivalDate}";
-    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival{arrival}";
+    private static final String GET_AVAILABLE_ANNOUNCEMETS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNot?mail={mail}&mail={mail}";
+    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver_Mail?mail={mail}";
+    private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers?mail={mail}";
+    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate?arrivalDate={arrivalDate}";
+    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival?arrival={arrival}";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -33,7 +34,8 @@ public class AnnouncementConsumer {
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("mail", mail)
+                        mail,
+                        mail
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
@@ -44,7 +46,7 @@ public class AnnouncementConsumer {
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("mail", mail)
+                        mail
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
@@ -55,7 +57,7 @@ public class AnnouncementConsumer {
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("mail", mail)
+                        mail
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
@@ -74,25 +76,25 @@ public class AnnouncementConsumer {
         });
         return announcementList;
     }
-    public List<Announcement> getByArrivalDate(String mail){
+    public List<Announcement> getByArrivalDate(LocalDateTime arrivalDate){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("arrivalDate", mail)
+                        arrivalDate
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
-    public List<Announcement> getByArrival(String mail){
+    public List<Announcement> getByArrival(String arrival){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         GET_ANNOUNCEMETS_BY_ARRIVAL_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        Map.of("arrival", mail)
+                        arrival
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
