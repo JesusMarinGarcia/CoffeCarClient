@@ -14,14 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 @Controller
-@SessionAttributes("user")
 public class UserController {
-    @Autowired
-    private UserConsumer userConsumer;
+    private final UserConsumer userConsumer;
 
-    @ModelAttribute("user")
-    public User setUpUser(OAuth2AuthenticationToken auth2AuthenticationToken){
-        return userConsumer.getByEmail(auth2AuthenticationToken.getPrincipal().getAttribute("email"));
+    public UserController(UserConsumer userConsumer) {
+        this.userConsumer = userConsumer;
     }
 
     @GetMapping("/profile")
