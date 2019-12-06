@@ -17,12 +17,12 @@ import java.util.ArrayList;
 
 
 @Controller
-public class AnnounceControler {
+public class AnnounceController {
 
     final
     RestTemplate restTemplate;
 
-    public AnnounceControler(RestTemplate restTemplate) {
+    public AnnounceController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

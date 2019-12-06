@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -35,13 +37,21 @@ public class UserConsumer {
         return new ArrayList<>(Objects.requireNonNull(usersResponse.getBody()).getContent());
     }
     public User getByEmail(String email){
-        ResponseEntity<User> user = restTemplate
-                .getForEntity(
-                        GET_USER_BY_EMAIL_URL,
-                        User.class,
-                        email
-                );
-        return Objects.requireNonNull(user.getBody());
+        ResponseEntity<User> user=null;
+        try {
+            user = restTemplate
+                    .getForEntity(
+                            GET_USER_BY_EMAIL_URL,
+                            User.class,
+                            email
+                    );
+        } catch (HttpClientErrorException ex)   {
+            if (ex.getStatusCode() != HttpStatus.NOT_FOUND) {
+                throw ex;
+            }
+        }
+
+        return user!=null ? Objects.requireNonNull(user.getBody()) : null;
     }
 
     public void create(User user){
