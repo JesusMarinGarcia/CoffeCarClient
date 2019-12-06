@@ -23,6 +23,7 @@
 
             $('input[type=file]').on("change", function() {
 
+                document.getElementById("labelFile").innerHTML = "Imagen cargada";
                 var $files = $(this).get(0).files;
 
                 if ($files.length) {
@@ -97,21 +98,21 @@
     <div class="nav justify-content-center" style="padding-top: 1%">
         <div class="custom-file" style="max-width: 20%; min-width: 200px">
             <input type="file" class="custom-file-input imgur" id="foto" accept="image/png, .jpeg, .jpg" name="foto" data-max-size="5000" />
-            <label class="custom-file-label" for="foto">Elige una foto</label>
+            <label class="custom-file-label" id="labelFile" for="foto">Elige una foto</label>
         </div>
 
     </div>
 </form>
-<form id="crearAnuncio">
+<form id="crearAnuncio" action="createAnnouncement/confirm" method="POST" th:action="@{createAnnouncement/confirm}" th:object="${anuncio}">
 
-    <input type="hidden" id="link" value="" />
+    <input type="hidden" id="link" value="" th:field="*{imgLink}"/>
 
     <div class="nav justify-content-center" style="padding-top: 2%">
         <div class="input-group" style="max-width: 20%">
             <div class="input-group-prepend">
                 <span class="input-group-text">Título</span>
             </div>
-            <input type="text" class="form-control" aria-label="With textarea" id="title"/>
+            <input th:field="*{title}" type="text" class="form-control" aria-label="With textarea" id="title"/>
         </div>
     </div>
 
@@ -121,24 +122,26 @@
                 <span class="input-group-text">Asientos:</span>
                 <span style="min-width: 42px" class="input-group-text" id="nasientos"></span>
             </div>
-            <input style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
+            <input th:field="*{seats}" style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
 
         </div>
     </div>
-
     <div class="nav justify-content-center" style="padding-top: 2%">
         <div class="input-group input-group mb-3" style="width: 350px">
             <div class="input-group-prepend">
                 <span class="input-group-text">Fecha salida</span>
             </div>
-            <input type="datetime-local" ,id="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+            <input th:field="*{departureTime}" id="dt" type="datetime-local" name="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
         </div>
         <div class="input-group input-group mb-3" style="width: 350px; margin-left: 20px">
             <div class="input-group-prepend">
                 <span class="input-group-text">Fecha llegada</span>
             </div>
-            <input type="datetime-local" id="fechaLlegada"  class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+            <input th:field="*{arrivalDate}" id="at" type="datetime-local" name="fechaLlegada" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
         </div>
+    </div>
+    <div class="nav justify-content-center">
+        <label id="lbl" style="color: green; font-size: small">Formato de fecha: yyyy-MM-dd HH:mm</label>
     </div>
 
     <div class="nav justify-content-center" style="padding-top: 1%">
@@ -146,17 +149,17 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Breve descripción</span>
             </div>
-            <textarea class="form-control" aria-label="With textarea" id="descripcion"></textarea>
+            <textarea th:field="*{description}" class="form-control" aria-label="With textarea" id="descripcion"></textarea>
         </div>
     </div>
 
 
     <br>
-    <input type="hidden" id="latOrigen" name="latOrigen" value=""/>
-    <input type="hidden" id="longOrigen" name="longOrigen" value=""/>
-    <input type="hidden" id="latDestino" name="latDestino" value=""/>
-    <input type="hidden" id="longDestino" name="longDestino" value=""/>
-    <input type="hidden" id="arrival" name="arrival" value=""/>
+    <input th:field="*{departureLatitude}" type="hidden" id="latOrigen" name="latOrigen" value=""/>
+    <input th:field="*{getDepartureLongitude}" type="hidden" id="longOrigen" name="longOrigen" value=""/>
+    <input th:field="*{arrivalLatitude}" type="hidden" id="latDestino" name="latDestino" value=""/>
+    <input th:field="*{arrivalLongitude}" type="hidden" id="longDestino" name="longDestino" value=""/>
+    <input th:field="*{arrival}" type="hidden" id="arrival" name="arrival" value=""/>
 
 
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
@@ -205,6 +208,13 @@
     })
         .setLngLat([-4.42034, 36.72016])
         .addTo(map);
+    var lngLat = marker.getLngLat();
+    str = JSON.stringify(lngLat);
+    coordArray = str.split(",");
+    strLongOri = coordArray[0].slice(7);
+    strLatOri = coordArray[1].slice(6,-1);
+    document.getElementById('latOrigen').value = strLatOri;
+    document.getElementById('longOrigen').value= strLongOri;
 
 
     map.on('click', function(e) {
@@ -266,6 +276,15 @@
         .setLngLat([-4.42034, 36.72016])
         .addTo(mapDes);
 
+    var lngLatDes = markerDes.getLngLat();
+    strDes = JSON.stringify(lngLatDes);
+    coordArrayDes = strDes.split(",");
+    strLongDes = coordArrayDes[0].slice(7);
+    strLatDes = coordArrayDes[1].slice(6,-1);
+    document.getElementById('latDestino').value = strLatDes;
+    document.getElementById('longDestino').value= strLongDes;
+    safeAddress(strLatDes,strLongDes);
+
     mapDes.on('click', function(e) {
         strDes = JSON.stringify(e.lngLat);
         coordArrayDes = strDes.split(",");
@@ -305,7 +324,7 @@
     <br>
     <br>
     <div class="row container-fluid justify-content-center" style="padding-left: 9%; padding-right: 9%">
-        <button type="button" class="btn btn-primary btn-lg btn-block" >¡Crear un nuevo anuncio!</button>
+        <input type="submit" class="btn btn-primary btn-lg btn-block" value="¡Crear un nuevo anuncio!"></input>
     </div>
     <br>
     <br>
