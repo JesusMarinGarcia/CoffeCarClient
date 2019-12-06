@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.List;
 
 @Data
-@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
+@JsonSerialize
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
