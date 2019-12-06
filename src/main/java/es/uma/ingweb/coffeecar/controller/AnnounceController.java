@@ -5,15 +5,14 @@ import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
 import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.Announcement;
 import es.uma.ingweb.coffeecar.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttribute;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,16 +20,17 @@ import java.util.ArrayList;
 
 
 @Controller
-public class AnnounceControler {
+public class AnnounceController {
 
-    final
-    RestTemplate restTemplate;
+    private final AnnouncementConsumer announcementConsumer;
+    private final UserConsumer userConsumer;
 
-    public AnnounceControler(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public AnnounceController(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer) {
+        this.announcementConsumer = announcementConsumer;
+        this.userConsumer = userConsumer;
     }
 
-    @PostMapping("/announce/create")
+    @PostMapping("createAnnouncement/confirm")
     public String announce(
             @ModelAttribute Announcement announcement,
             OAuth2AuthenticationToken authenticationToken,
@@ -38,13 +38,8 @@ public class AnnounceControler {
             @RequestParam (name = "fechaSalida") String fsalida,
             @RequestParam (name = "fechaLlegada") String fllegada*/
             ){
-        AnnouncementConsumer announcementConsumer = new AnnouncementConsumer(restTemplate);
-        Announcement announcement = new Announcement();
-        announcement.setArrival(arrival);
-        announcement.setTitle(title);
-        announcement.setSeats(seats);
-        announcement.setImgLink(link);
-        if (desc == null || desc.isEmpty()){
+        User driver =  userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        if (announcement.getDescription() == null || announcement.getDescription().isEmpty()){
             announcement.setDescription("No hay descripción");
         }
         announcement.setDriver(driver);
