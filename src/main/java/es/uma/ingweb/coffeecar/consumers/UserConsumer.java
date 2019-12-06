@@ -1,20 +1,17 @@
 package es.uma.ingweb.coffeecar.consumers;
 
 import es.uma.ingweb.coffeecar.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -24,9 +21,11 @@ public class UserConsumer {
     private static final String GET_USER_BY_EMAIL_URL = "http://localhost:8080/users/search/findUserByEmail?email={email}";
 
     private final RestTemplate restTemplate;
+    private final AnnouncementConsumer announcementConsumer;
 
-    public UserConsumer(RestTemplate restTemplate) {
+    public UserConsumer(RestTemplate restTemplate, AnnouncementConsumer announcementConsumer) {
         this.restTemplate = restTemplate;
+        this.announcementConsumer = announcementConsumer;
     }
 
     public List<User> getAll() {
@@ -50,8 +49,13 @@ public class UserConsumer {
                 throw ex;
             }
         }
+        return user!=null ? completeUser(Objects.requireNonNull(user.getBody())) : null;
+    }
 
-        return user!=null ? Objects.requireNonNull(user.getBody()) : null;
+    private User completeUser(User user){
+        user.setOwnedAnnouncements(announcementConsumer.getByDriver(user.getEmail()));
+        user.setJoinedAnnouncements(announcementConsumer.getByPassenger(user.getEmail()));
+        return user;
     }
 
     public void create(User user){

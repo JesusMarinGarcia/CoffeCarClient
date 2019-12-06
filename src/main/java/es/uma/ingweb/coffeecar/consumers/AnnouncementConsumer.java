@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -44,15 +46,25 @@ public class AnnouncementConsumer {
         return sortByDepartureDate(allTrips);
     }
     public List<Announcement> getByDriver(String email){
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-                restTemplate.exchange(
-                        GET_ANNOUNCEMENTS_BY_DRIVER_URL,
-                        HttpMethod.GET,
-                        null,
-                        getParameterizedTypeReference(),
-                        email
-                );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+        ResponseEntity<PagedModel<Announcement>> announcementResponse = null;
+        try{
+            announcementResponse =
+                    restTemplate.exchange(
+                            GET_ANNOUNCEMENTS_BY_DRIVER_URL,
+                            HttpMethod.GET,
+                            null,
+                            getParameterizedTypeReference(),
+                            email
+                    );
+        }catch (HttpClientErrorException ex)   {
+            if (ex.getStatusCode() != HttpStatus.NOT_FOUND) {
+                throw ex;
+            }
+        }
+
+        return announcementResponse!=null ?
+                new ArrayList<Announcement>(Objects.requireNonNull(announcementResponse.getBody()).getContent())
+                : new ArrayList<Announcement>();
     }
     public List<Announcement> getByPassenger(String email) {
         List<Announcement> allTrips = getAll();
