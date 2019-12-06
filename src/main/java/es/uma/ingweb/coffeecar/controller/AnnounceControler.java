@@ -5,14 +5,15 @@ import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
 import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.Announcement;
 import es.uma.ingweb.coffeecar.entities.User;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,15 +23,14 @@ import java.util.ArrayList;
 @Controller
 public class AnnounceControler {
 
-    private final AnnouncementConsumer announcementConsumer;
-    private final UserConsumer userConsumer;
+    final
+    RestTemplate restTemplate;
 
-    public AnnounceControler(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer) {
-        this.announcementConsumer = announcementConsumer;
-        this.userConsumer = userConsumer;
+    public AnnounceControler(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
-    @PostMapping("createAnnouncement/confirm")
+    @PostMapping("/announce/create")
     public String announce(
             @ModelAttribute Announcement announcement,
             OAuth2AuthenticationToken authenticationToken,
@@ -38,8 +38,13 @@ public class AnnounceControler {
             @RequestParam (name = "fechaSalida") String fsalida,
             @RequestParam (name = "fechaLlegada") String fllegada*/
             ){
-        User driver =  userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        if (announcement.getDescription() == null || announcement.getDescription().isEmpty()){
+        AnnouncementConsumer announcementConsumer = new AnnouncementConsumer(restTemplate);
+        Announcement announcement = new Announcement();
+        announcement.setArrival(arrival);
+        announcement.setTitle(title);
+        announcement.setSeats(seats);
+        announcement.setImgLink(link);
+        if (desc == null || desc.isEmpty()){
             announcement.setDescription("No hay descripción");
         }
         announcement.setDriver(driver);

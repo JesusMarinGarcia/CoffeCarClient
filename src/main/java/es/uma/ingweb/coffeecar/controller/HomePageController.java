@@ -11,7 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Controller
 public class HomePageController {
@@ -30,17 +29,15 @@ public class HomePageController {
         User user = Optional.ofNullable(userConsumer.getByEmail(email))
               .orElse(createUser(email, name));
 
-        userConsumer.create(user);
-/*
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(email));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
-*/
-        return "/home";
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
+
+        return "home";
     }
 
     private User createUser(String email, String name) {
         User user = User.builder()
-              .mail(email)
+              .email(email)
               .name(name)
               .build();
         userConsumer.create(user);
