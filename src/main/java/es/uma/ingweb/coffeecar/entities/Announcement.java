@@ -1,8 +1,11 @@
 package es.uma.ingweb.coffeecar.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -11,12 +14,13 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
+@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
 @AllArgsConstructor
 public class Announcement{
     private long id;
     private String title;
-    private LocalDateTime departureTime;
-    private LocalDateTime arrivalDate;
+    private String departureTime;
+    private String arrivalDate;
     private String description;
     private String arrival;
     private double arrivalLatitude;
@@ -27,5 +31,4 @@ public class Announcement{
     private int seats;
     private User driver;
     private List<User> passengers;
-
 }

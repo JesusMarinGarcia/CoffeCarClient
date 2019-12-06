@@ -10,8 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.ArrayList;
 
 @Controller
 public class HomePageController {
@@ -27,21 +26,22 @@ public class HomePageController {
     public String home(OAuth2AuthenticationToken authenticationToken, Model model) {
         String email = authenticationToken.getPrincipal().getAttribute("email");
         String name = authenticationToken.getPrincipal().getAttribute("name");
-        User user = Optional.ofNullable(userConsumer.getByEmail(email))
-              .orElse(createUser(email, name));
+        User user = userConsumer.getByEmail(email);
+        if(user==null || user.getEmail()==null)
+            user = createUser(email,name);
 
-        userConsumer.create(user);
-/*
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(email));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
-*/
-        return "/home";
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
+
+        return "home";
     }
 
     private User createUser(String email, String name) {
         User user = User.builder()
-              .mail(email)
+              .email(email)
               .name(name)
+              .joinedAnnouncements(new ArrayList<>())
+              .ownedAnnouncements(new ArrayList<>())
               .build();
         userConsumer.create(user);
         return user;

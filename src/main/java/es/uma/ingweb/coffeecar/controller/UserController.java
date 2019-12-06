@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 @Controller
 public class UserController {
-    @Autowired
-    private UserConsumer userConsumer;
+    private final UserConsumer userConsumer;
+
+    public UserController(UserConsumer userConsumer) {
+        this.userConsumer = userConsumer;
+    }
 
     @GetMapping("/profile")
     public String profile(){
