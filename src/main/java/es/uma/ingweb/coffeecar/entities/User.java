@@ -11,7 +11,7 @@ import java.util.List;
 public class User {
     private long id;
     private String name;
-    private String mail;
+    private String email;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Announcement> ownedAnnouncements;

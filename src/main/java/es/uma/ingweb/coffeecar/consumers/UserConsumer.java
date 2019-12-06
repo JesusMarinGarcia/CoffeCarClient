@@ -41,7 +41,7 @@ public class UserConsumer {
                         User.class,
                         email
                 );
-        return user.getBody();
+        return Objects.requireNonNull(user.getBody());
     }
 
     public void create(User user){

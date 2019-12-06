@@ -3,12 +3,10 @@ package es.uma.ingweb.coffeecar.consumers;
 import es.uma.ingweb.coffeecar.entities.Announcement;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,68 +16,66 @@ import java.util.*;
 @Service
 public class AnnouncementConsumer {
     private static final String URL ="http://localhost:8080/announced";
-    private static final String GET_AVAILABLE_ANNOUNCEMETS_URL = "http://localhost:8080/announced/search/findAnnouncesByDriverNotAndPassengersNot?mail={mail}&mail={mail}";
-    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver_Mail?mail={mail}";
-    private static final String  GET_ANNOUNCEMENTS_BY_PASSANGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers?mail={mail}";
-    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate?arrivalDate={arrivalDate}";
-    private static final String GET_ANNOUNCEMETS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival?arrival={arrival}";
+    private static final String GET_ALL_ANNOUNCEMENTS_URL = "http://localhost:8080/announced/search/findAll";
+    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver?user={user}";
+    private static final String  GET_ANNOUNCEMENTS_BY_PASSENGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers?user={user}";
+    private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate?arrivalDate={arrivalDate}";
+    private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival?arrival={arrival}";
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    public List<Announcement> getAvailableAnnouncements(String mail){
+    public AnnouncementConsumer(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public List<Announcement> getAvailableAnnouncements(User user){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
-                        GET_AVAILABLE_ANNOUNCEMETS_URL,
+                        URL,
                         HttpMethod.GET,
                         null,
-                        getParameterizedTypeReference(),
-                        mail,
-                        mail
+                        getParameterizedTypeReference()
                 );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+        List<Announcement> allTrips = new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+        allTrips.removeAll(getMyTrips(user));
+        return allTrips;
     }
-    public List<Announcement> getByDriver(String mail){
+    public List<Announcement> getByDriver(User user){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         GET_ANNOUNCEMENTS_BY_DRIVER_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        mail
+                        user
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
-    public List<Announcement> getByPassenger(String mail){
+    public List<Announcement> getByPassenger(User user){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
-                        GET_ANNOUNCEMENTS_BY_PASSANGER_URL,
+                        GET_ANNOUNCEMENTS_BY_PASSENGER_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
-                        mail
+                        user
                 );
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
-    public List<Announcement> getMyTrips(String mail){
-        List<Announcement> allMyTrips = getByDriver(mail);
-        allMyTrips.addAll(getByPassenger(mail));
+    public List<Announcement> getMyTrips(User user){
+        List<Announcement> allMyTrips = getByDriver(user);
+        allMyTrips.addAll(getByPassenger(user));
         return sortByDepartureDate(allMyTrips);
 
     }
-    private List<Announcement> sortByDepartureDate(List announcementList){
-        Collections.sort(announcementList, new Comparator<Announcement>(){
-            @Override
-            public int compare(Announcement announcement, Announcement t1) {
-                return announcement.getDepartureTime().compareTo(t1.getDepartureTime());
-            }
-        });
+    private List<Announcement> sortByDepartureDate(List<Announcement> announcementList){
+        announcementList.sort(Comparator.comparing(Announcement::getDepartureTime));
         return announcementList;
     }
     public List<Announcement> getByArrivalDate(LocalDateTime arrivalDate){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
-                        GET_ANNOUNCEMETS_BY_ARRIVAL_DATE_URL,
+                        GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
@@ -90,7 +86,7 @@ public class AnnouncementConsumer {
     public List<Announcement> getByArrival(String arrival){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
-                        GET_ANNOUNCEMETS_BY_ARRIVAL_URL,
+                        GET_ANNOUNCEMENTS_BY_ARRIVAL_URL,
                         HttpMethod.GET,
                         null,
                         getParameterizedTypeReference(),
