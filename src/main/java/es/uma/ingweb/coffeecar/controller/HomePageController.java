@@ -10,7 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.Optional;
+import java.util.ArrayList;
 
 @Controller
 public class HomePageController {
@@ -40,8 +40,8 @@ public class HomePageController {
         User user = User.builder()
               .email(email)
               .name(name)
-              .joinedAnnouncements(null)
-              .ownedAnnouncements(null)
+              .joinedAnnouncements(new ArrayList<>())
+              .ownedAnnouncements(new ArrayList<>())
               .build();
         userConsumer.create(user);
         return user;
