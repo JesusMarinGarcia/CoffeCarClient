@@ -18,8 +18,8 @@ import java.util.Objects;
 @Service
 public class UserConsumer {
     private static final String URL = "http://localhost:8080/users";
-    private static final String GET_ALL_USERS_URL = "http://localhost:8080/users/search/findAll";
-    private static final String GET_USER_BY_EMAIL_URL = "http://localhost:8080/users/search?email?{email}";
+    private static final String GET_ALL_USERS_URL = "http://localhost:8080/users";
+    private static final String GET_USER_BY_EMAIL_URL = "http://localhost:8080/users/search/findUserByEmail?email={email}";
 
     private final RestTemplate restTemplate;
 
@@ -37,9 +37,11 @@ public class UserConsumer {
     public User getByEmail(String email){
         ResponseEntity<User> user = restTemplate
                 .getForEntity(
-                        GET_USER_BY_EMAIL_URL.concat("?email="+email), User.class, email
+                        GET_USER_BY_EMAIL_URL,
+                        User.class,
+                        email
                 );
-        return user.getBody();
+        return Objects.requireNonNull(user.getBody());
     }
 
     public void create(User user){
