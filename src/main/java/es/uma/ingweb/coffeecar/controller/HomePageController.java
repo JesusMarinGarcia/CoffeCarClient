@@ -24,8 +24,9 @@ public class HomePageController {
     public String home(OAuth2AuthenticationToken authenticationToken, Model model) {
         String email = authenticationToken.getPrincipal().getAttribute("email");
         String name = authenticationToken.getPrincipal().getAttribute("name");
-        User user = Optional.ofNullable(userConsumer.getByEmail(email))
-              .orElse(createUser(email, name));
+        User user = userConsumer.getByEmail(email);
+        if(user==null || user.getEmail()==null)
+            user = createUser(email,name);
 
         model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
         model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
@@ -37,6 +38,8 @@ public class HomePageController {
         User user = User.builder()
               .email(email)
               .name(name)
+              .joinedAnnouncements(null)
+              .ownedAnnouncements(null)
               .build();
         userConsumer.create(user);
         return user;

@@ -18,8 +18,8 @@ import java.util.Objects;
 @Service
 public class UserConsumer {
     private static final String URL = "http://localhost:8080/users";
-    private static final String GET_ALL_USERS_URL = "http://localhost:8080/users/search/findAll";
-    private static final String GET_USER_BY_EMAIL_URL = "http://localhost:8080/users/search?email={email}";
+    private static final String GET_ALL_USERS_URL = "http://localhost:8080/users";
+    private static final String GET_USER_BY_EMAIL_URL = "http://localhost:8080/users/search/findUserByEmail?email={email}";
 
     private final RestTemplate restTemplate;
 
