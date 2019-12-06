@@ -16,9 +16,6 @@ import java.util.*;
 @Service
 public class AnnouncementConsumer {
     private static final String URL ="http://localhost:8080/announced";
-    private static final String GET_ALL_ANNOUNCEMENTS_URL = "http://localhost:8080/announced/search/findAll";
-    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver?user={user}";
-    private static final String  GET_ANNOUNCEMENTS_BY_PASSENGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers?user={user}";
     private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate?arrivalDate={arrivalDate}";
     private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival?arrival={arrival}";
 
@@ -38,33 +35,12 @@ public class AnnouncementConsumer {
                 );
         List<Announcement> allTrips = new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
         allTrips.removeAll(getMyTrips(user));
-        return allTrips;
+        return sortByDepartureDate(allTrips);
     }
-    public List<Announcement> getByDriver(User user){
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-                restTemplate.exchange(
-                        GET_ANNOUNCEMENTS_BY_DRIVER_URL,
-                        HttpMethod.GET,
-                        null,
-                        getParameterizedTypeReference(),
-                        user
-                );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
-    }
-    public List<Announcement> getByPassenger(User user){
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-                restTemplate.exchange(
-                        GET_ANNOUNCEMENTS_BY_PASSENGER_URL,
-                        HttpMethod.GET,
-                        null,
-                        getParameterizedTypeReference(),
-                        user
-                );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
-    }
+
     public List<Announcement> getMyTrips(User user){
-        List<Announcement> allMyTrips = getByDriver(user);
-        allMyTrips.addAll(getByPassenger(user));
+        List<Announcement> allMyTrips = user.getJoinedAnnouncements();
+        allMyTrips.addAll(user.getOwnedAnnouncements());
         return sortByDepartureDate(allMyTrips);
 
     }
