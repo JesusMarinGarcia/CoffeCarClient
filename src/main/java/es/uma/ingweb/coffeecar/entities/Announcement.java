@@ -17,8 +17,8 @@ import java.util.List;
 public class Announcement{
     private long id;
     private String title;
-    private LocalDateTime departureTime;
-    private LocalDateTime arrivalDate;
+    private String departureTime;
+    private String arrivalDate;
     private String description;
     private String arrival;
     private double arrivalLatitude;

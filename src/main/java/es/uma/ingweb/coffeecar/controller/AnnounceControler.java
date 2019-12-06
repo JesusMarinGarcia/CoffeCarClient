@@ -49,11 +49,11 @@ public class AnnounceControler {
         LocalDateTime arrivalDate = LocalDateTime.parse(fllegada, formatter);
         announcement.setDepartureTime(departureDate);
         announcement.setArrivalDate(arrivalDate);*/
-        
+
         announcementConsumer.create(announcement);
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
-        return "redirect:/home";
+        return "redirect:/";
     }
 
     @GetMapping("/createAnnouncement")
