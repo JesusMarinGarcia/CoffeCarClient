@@ -12,12 +12,14 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AnnouncementConsumer {
     private static final String URL ="http://localhost:8080/announced";
     private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate?arrivalDate={arrivalDate}";
     private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival?arrival={arrival}";
+    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver_Email?email={email}";
 
 
     private final RestTemplate restTemplate;
@@ -26,7 +28,7 @@ public class AnnouncementConsumer {
         this.restTemplate = restTemplate;
     }
 
-    public List<Announcement> getAvailableAnnouncements(User user){
+    public List<Announcement> getAll(){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
                         URL,
@@ -34,21 +36,47 @@ public class AnnouncementConsumer {
                         null,
                         getParameterizedTypeReference()
                 );
-        List<Announcement> allTrips = new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
-        allTrips.removeAll(getMyTrips(user));
+        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+    }
+    public List<Announcement> getAvailableAnnouncements(String email){
+        List<Announcement> allTrips = getAll();
+        allTrips.removeAll(getMyTrips(email));
         return sortByDepartureDate(allTrips);
     }
+    public List<Announcement> getByDriver(String email){
+        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+                restTemplate.exchange(
+                        GET_ANNOUNCEMENTS_BY_DRIVER_URL,
+                        HttpMethod.GET,
+                        null,
+                        getParameterizedTypeReference(),
+                        email
+                );
+        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+    }
+    public List<Announcement> getByPassenger(String email) {
+        List<Announcement> allTrips = getAll();
 
-    public List<Announcement> getMyTrips(User user){
-        List<Announcement> allMyTrips = user.getJoinedAnnouncements();
-        allMyTrips.addAll(user.getOwnedAnnouncements());
+        return allTrips
+                .stream()
+                .filter(announcement -> containsUser(announcement, email)).collect(Collectors.toList());
+    }
+    public List<Announcement> getMyTrips(String email){
+        List<Announcement> allMyTrips = getByPassenger(email);
+        allMyTrips.addAll(getByDriver(email));
         return sortByDepartureDate(allMyTrips);
+    }
 
+    private Boolean containsUser(Announcement announce, String email){
+        return announce.getPassengers() != null && announce.getPassengers()
+                .stream()
+                .noneMatch(user -> user.getEmail().equals(email));
     }
     private List<Announcement> sortByDepartureDate(List<Announcement> announcementList){
         announcementList.sort(Comparator.comparing(Announcement::getDepartureTime));
         return announcementList;
     }
+
     public List<Announcement> getByArrivalDate(LocalDateTime arrivalDate){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
                 restTemplate.exchange(
