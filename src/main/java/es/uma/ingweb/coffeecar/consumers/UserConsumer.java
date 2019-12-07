@@ -6,13 +6,14 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -22,11 +23,13 @@ public class UserConsumer {
     private static final String GET_USER_BY_EMAIL_URL = "http://localhost:8080/users/search/findUserByEmail?email={email}";
 
     private final RestTemplate restTemplate;
+    private final AnnouncementConsumer announcementConsumer;
     private final RestTemplateProxy restTemplateProxy;
     public UserConsumer(RestTemplate restTemplate, AnnouncementConsumer announcementConsumer, RestTemplateProxy restTemplateProxy) {
         this.restTemplate = restTemplate;
         this.announcementConsumer = announcementConsumer;
         this.restTemplateProxy = restTemplateProxy;
+
     }
 
     public List<User> getAll() {
@@ -34,7 +37,7 @@ public class UserConsumer {
               .exchange(GET_ALL_USERS_URL, HttpMethod.GET, null,
                     getParameterizedTypeReference()
               );
-        return new ArrayList<>((Objects.requireNonNull(usersResponse.getBody())).getContent());
+        return new ArrayList<>((usersResponse.getBody()).getContent());
     }
 
     public Optional<User> optionalGetByEmail(String email) {
@@ -47,6 +50,12 @@ public class UserConsumer {
               GET_USER_BY_EMAIL_URL,
               User.class,
               email).getBody());
+    }
+
+    private User completeUser(User user){
+        user.setOwnedAnnouncements(announcementConsumer.getByDriver(user.getEmail()));
+        user.setJoinedAnnouncements(announcementConsumer.getByPassenger(user.getEmail()));
+        return user;
     }
 
     public void create(User user) {
