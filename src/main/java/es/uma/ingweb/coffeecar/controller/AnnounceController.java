@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 
@@ -65,8 +63,7 @@ public class AnnounceController {
 
     @GetMapping("/announcementDetails")
     public String announcementDetails(@RequestParam(name="announcementId") long id, Model model){
-        AnnouncementConsumer announcementConsumer = new AnnouncementConsumer();
-        model.addAttribute("announcement",announcementConsumer.getById(id));
+
         return "announcementDetails";
     }
 }
