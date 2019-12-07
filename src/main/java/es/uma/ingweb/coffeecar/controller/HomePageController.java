@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.Objects;
+import java.util.Optional;
 
 @Controller
 public class HomePageController {
@@ -24,9 +24,18 @@ public class HomePageController {
     public String home(OAuth2AuthenticationToken authenticationToken, Model model) {
         String email = authenticationToken.getPrincipal().getAttribute("email");
         String name = authenticationToken.getPrincipal().getAttribute("name");
+<<<<<<< HEAD
         User user = userConsumer.optionalGetByEmail(email)
               .filter(u -> Objects.nonNull(u.getEmail()))
               .orElseGet(() -> createUser(email, name));
+=======
+        User user = userConsumer.getByEmail(email);
+        if(user==null || user.getEmail()==null)
+            user = createUser(email,name);
+
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
+>>>>>>> parent of 348a147... Added rest controller proxy to handle optionals
 
         return "home";
     }
