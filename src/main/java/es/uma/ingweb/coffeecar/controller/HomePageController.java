@@ -30,8 +30,8 @@ public class HomePageController {
         if(user==null || user.getEmail()==null)
             user = createUser(email,name);
 
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(email));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
 
         return "home";
     }

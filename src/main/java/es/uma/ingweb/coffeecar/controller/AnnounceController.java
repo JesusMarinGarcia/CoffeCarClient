@@ -51,6 +51,7 @@ public class AnnounceController {
         announcement.setArrivalDate(arrivalDate);*/
 
         announcementConsumer.create(announcement);
+
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
         return "redirect:/";
