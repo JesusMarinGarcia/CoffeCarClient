@@ -8,12 +8,14 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
@@ -34,14 +36,15 @@ public class AnnouncementConsumer {
     }
 
     public List<Announcement> getAll() {
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-              restTemplate.exchange(
-                    URL,
-                    HttpMethod.GET,
-                    null,
-                    getParameterizedTypeReference()
-              );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+              return restTemplateProxy.exchange(
+                URL,
+                HttpMethod.GET,
+                null,
+                getParameterizedTypeReference()
+        )
+                .map(HttpEntity::getBody).map(CollectionModel::getContent)
+                .map(Collection::stream).map(content -> content.collect(toList()))
+                .orElse(Collections.emptyList());
     }
 
     public List<Announcement> getAvailableAnnouncements(String email) {
@@ -100,39 +103,39 @@ public class AnnouncementConsumer {
     }
 
     public List<Announcement> getByArrivalDate(LocalDateTime arrivalDate) {
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-              restTemplate.exchange(
-                    GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL,
-                    HttpMethod.GET,
-                    null,
-                    getParameterizedTypeReference(),
-                    arrivalDate
-              );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+        return restTemplateProxy.exchange(
+                GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL,
+                HttpMethod.GET,
+                null,
+                getParameterizedTypeReference(),
+                arrivalDate)
+                .map(HttpEntity::getBody).map(CollectionModel::getContent)
+                .map(Collection::stream).map(content -> content.collect(toList()))
+                .orElse(Collections.emptyList());
     }
 
     public List<Announcement> getByArrival(String arrival) {
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-              restTemplate.exchange(
-                    GET_ANNOUNCEMENTS_BY_ARRIVAL_URL,
-                    HttpMethod.GET,
-                    null,
-                    getParameterizedTypeReference(),
-                    arrival
-              );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+        return restTemplateProxy.exchange(
+                GET_ANNOUNCEMENTS_BY_ARRIVAL_URL,
+                HttpMethod.GET,
+                null,
+                getParameterizedTypeReference(),
+                arrival)
+                .map(HttpEntity::getBody).map(CollectionModel::getContent)
+                .map(Collection::stream).map(content -> content.collect(toList()))
+                .orElse(Collections.emptyList());
     }
 
     public void create(Announcement announcement) {
-        restTemplate.postForEntity(URL, announcement, Announcement.class);
+        restTemplateProxy.exchange(URL, HttpMethod.POST, new HttpEntity<>(announcement), getParameterizedTypeReference());
     }
 
     public void delete(Announcement announcement) {
-        restTemplate.delete(URL, announcement, Announcement.class);
+        restTemplateProxy.exchange(URL, HttpMethod.DELETE, new HttpEntity<>(announcement), getParameterizedTypeReference());
     }
 
     public void edit(Announcement announcement) {
-        restTemplate.put(URL, announcement, Announcement.class);
+        restTemplateProxy.exchange(URL, HttpMethod.PUT, new HttpEntity<>(announcement), getParameterizedTypeReference());
     }
 
     private static ParameterizedTypeReference<PagedModel<Announcement>> getParameterizedTypeReference() {
