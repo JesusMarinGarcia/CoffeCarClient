@@ -13,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -36,10 +35,10 @@ public class UserConsumer {
               .exchange(GET_ALL_USERS_URL, HttpMethod.GET, null,
                     getParameterizedTypeReference()
               );
-        return new ArrayList<>((Objects.requireNonNull(usersResponse.getBody())).getContent());
+        return new ArrayList<>((usersResponse.getBody()).getContent());
     }
 
-  /*  public User optionalGetByEmail(String email) {
+    public Optional<User> optionalGetByEmail(String email) {
         return restTemplateProxy.getForEntity(GET_USER_BY_EMAIL_URL, User.class, email)
               .map(HttpEntity::getBody).orElseThrow(NullPointerException::new);
     }*/
@@ -48,7 +47,7 @@ public class UserConsumer {
         return restTemplateProxy.getForEntity(
               GET_USER_BY_EMAIL_URL,
               User.class,
-              email).map(HttpEntity::getBody).orElseThrow(NullPointerException::new);
+              email).getBody();
     }
 
     public void create(User user) {

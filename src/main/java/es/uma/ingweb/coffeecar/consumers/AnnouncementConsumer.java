@@ -8,14 +8,12 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -26,6 +24,9 @@ public class AnnouncementConsumer {
     private static final String GET_ANNOUNCEMENTS_BY_PASSENGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers?user={user}";
     private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate?arrivalDate={arrivalDate}";
     private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival?arrival={arrival}";
+    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver_Email?email={email}";
+    private static final String  GET_ANNOUNCEMENTS_BY_PASSENGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers?user={user}";
+
 
     private final RestTemplate restTemplate;
     private final RestTemplateProxy restTemplateProxy;
@@ -35,29 +36,17 @@ public class AnnouncementConsumer {
         this.restTemplateProxy = restTemplateProxy;
     }
 
-    public List<Announcement> getAll() {
-              return restTemplateProxy.exchange(
-                URL,
-                HttpMethod.GET,
-                null,
-                getParameterizedTypeReference()
-        )
-                .map(HttpEntity::getBody).map(CollectionModel::getContent)
-                .map(Collection::stream).map(content -> content.collect(toList()))
-                .orElse(Collections.emptyList());
-    }
-
-    public List<Announcement> getAvailableAnnouncements(String email) {
-        return restTemplateProxy.exchange(
-              URL + "/findAvailableAnnounces?email={email}",
-              HttpMethod.GET,
-              null,
-              getParameterizedTypeReference(),
-              email
-        )
-              .map(HttpEntity::getBody).map(CollectionModel::getContent)
-              .map(Collection::stream).map(content -> content.collect(toList()))
-              .orElse(Collections.emptyList());
+    public List<Announcement> getAvailableAnnouncements(User user){
+        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+                restTemplate.exchange(
+                        URL,
+                        HttpMethod.GET,
+                        null,
+                        getParameterizedTypeReference()
+                );
+        List<Announcement> allTrips = new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+        allTrips.removeAll(getMyTrips(user));
+        return allTrips;
     }
 
     public List<Announcement> getByDriver(User user) {
@@ -85,16 +74,16 @@ public class AnnouncementConsumer {
                     .orElse(Collections.emptyList());
     }
 
-    public List<Announcement> getMyTrips(String email) {
-        return restTemplateProxy.exchange(
-              URL + "/findUserTrips?email=email",
-              HttpMethod.GET,
-              null,
-              getParameterizedTypeReference(),
-              email)
-              .map(HttpEntity::getBody).map(CollectionModel::getContent)
-              .map(Collection::stream).map(content -> content.collect(toList()))
-              .orElse(Collections.emptyList());
+    public List<Announcement> getMyTrips(User user) {
+        List<Announcement> allMyTrips = getByDriver(user);
+        allMyTrips.addAll(getByPassenger(user));
+        return sortByDepartureDate(allMyTrips);
+    }
+
+    private Boolean containsUser(Announcement announce, String email){
+        return announce.getPassengers() != null && announce.getPassengers()
+                .stream()
+                .noneMatch(user -> user.getEmail().equals(email));
     }
 
     private List<Announcement> sortByDepartureDate(List<Announcement> announcementList) {
@@ -103,15 +92,15 @@ public class AnnouncementConsumer {
     }
 
     public List<Announcement> getByArrivalDate(LocalDateTime arrivalDate) {
-        return restTemplateProxy.exchange(
-                GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL,
-                HttpMethod.GET,
-                null,
-                getParameterizedTypeReference(),
-                arrivalDate)
-                .map(HttpEntity::getBody).map(CollectionModel::getContent)
-                .map(Collection::stream).map(content -> content.collect(toList()))
-                .orElse(Collections.emptyList());
+        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+              restTemplate.exchange(
+                    GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL,
+                    HttpMethod.GET,
+                    null,
+                    getParameterizedTypeReference(),
+                        arrivalDate
+                );
+        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
 
     public List<Announcement> getByArrival(String arrival) {
@@ -126,13 +115,7 @@ public class AnnouncementConsumer {
                 .orElse(Collections.emptyList());
     }
 
-    public Announcement getById(long id){
-        ResponseEntity<Announcement> a = restTemplate
-                .getForEntity(
-                        GET_ANNOUNCEMENT_BY_ID.concat("?id="+id), Announcement.class
-                );
-        return a.getBody();
-    }
+
 
     public void create(Announcement announcement) {
         restTemplateProxy.exchange(URL, HttpMethod.POST, new HttpEntity<>(announcement), getParameterizedTypeReference());

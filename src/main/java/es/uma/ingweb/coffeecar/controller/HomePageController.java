@@ -8,6 +8,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
 @Controller
 public class HomePageController {
     private final AnnouncementConsumer announcementConsumer;
@@ -25,8 +28,8 @@ public class HomePageController {
         User user = userConsumer.optionalGetByEmail(email)
               .filter(u -> Objects.nonNull(u.getEmail()))
               .orElseGet(() -> createUser(email, name));
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(email));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
 
         return "home";
     }
