@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -33,7 +34,7 @@ public class UserConsumer {
               .exchange(GET_ALL_USERS_URL, HttpMethod.GET, null,
                     getParameterizedTypeReference()
               );
-        return new ArrayList<>((usersResponse.getBody()).getContent());
+        return new ArrayList<>((Objects.requireNonNull(usersResponse.getBody())).getContent());
     }
 
     public Optional<User> optionalGetByEmail(String email) {

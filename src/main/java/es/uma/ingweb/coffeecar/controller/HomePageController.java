@@ -27,8 +27,8 @@ public class HomePageController {
         User user = userConsumer.optionalGetByEmail(email)
               .filter(u -> Objects.nonNull(u.getEmail()))
               .orElseGet(() -> createUser(email, name));
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(email));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
 
         return "home";
     }
