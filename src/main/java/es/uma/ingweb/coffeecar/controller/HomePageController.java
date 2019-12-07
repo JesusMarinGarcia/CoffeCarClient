@@ -29,18 +29,31 @@ public class HomePageController {
         User user = userConsumer.optionalGetByEmail(email)
               .filter(u -> Objects.nonNull(u.getEmail()))
               .orElseGet(() -> createUser(email, name));
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(email));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
+        model.addAttribute("announcements", announcementConsumer.getAvailableAnnouncements(email));
 
         return "home";
+    }
+
+    @GetMapping("/")
+    public String availableAnnouncements(OAuth2AuthenticationToken authenticationToken, Model model){
+        model.addAttribute("announcements", announcementConsumer.getAvailableAnnouncements(authenticationToken
+                .getPrincipal()
+                .getAttribute("email")));
+        return "announcementsTable :: resultAnnouncements";
+    }
+
+    @GetMapping("/myTrips")
+    public String showMyTrips(OAuth2AuthenticationToken authenticationToken, Model model){
+        model.addAttribute("announcements", announcementConsumer.getMyTrips(authenticationToken
+                                                                                    .getPrincipal()
+                                                                                    .getAttribute("email")));
+        return "announcementsTable :: resultAnnouncements";
     }
 
     private User createUser(String email, String name) {
         User user = User.builder()
               .email(email)
               .name(name)
-              .joinedAnnouncements(new ArrayList<>())
-              .ownedAnnouncements(new ArrayList<>())
               .build();
         userConsumer.create(user);
         return user;
