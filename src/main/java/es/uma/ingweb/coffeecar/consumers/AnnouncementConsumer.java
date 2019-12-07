@@ -112,6 +112,14 @@ public class AnnouncementConsumer {
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
 
+    public Announcement getById(long id){
+        ResponseEntity<Announcement> a = restTemplate
+                .getForEntity(
+                        GET_ANNOUNCEMENT_BY_ID.concat("?id="+id), Announcement.class
+                );
+        return a.getBody();
+    }
+
     public void create(Announcement announcement) {
         restTemplate.postForEntity(URL, announcement, Announcement.class);
     }

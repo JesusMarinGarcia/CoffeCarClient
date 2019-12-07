@@ -64,7 +64,9 @@ public class AnnounceController {
     }
 
     @GetMapping("/announcementDetails")
-    public String announcementDetails(@RequestParam(name="announcementId") long id){
+    public String announcementDetails(@RequestParam(name="announcementId") long id, Model model){
+        AnnouncementConsumer announcementConsumer = new AnnouncementConsumer();
+        model.addAttribute("announcement",announcementConsumer.getById(id));
         return "announcementDetails";
     }
 }
