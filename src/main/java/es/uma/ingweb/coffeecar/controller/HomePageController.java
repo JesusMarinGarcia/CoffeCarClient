@@ -3,14 +3,12 @@ package es.uma.ingweb.coffeecar.controller;
 import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
 import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.ArrayList;
+import java.util.Objects;
 
 @Controller
 public class HomePageController {
@@ -26,12 +24,11 @@ public class HomePageController {
     public String home(OAuth2AuthenticationToken authenticationToken, Model model) {
         String email = authenticationToken.getPrincipal().getAttribute("email");
         String name = authenticationToken.getPrincipal().getAttribute("name");
-        User user = userConsumer.getByEmail(email);
-        if(user==null || user.getEmail()==null)
-            user = createUser(email,name);
-
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(email));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
+        User user = userConsumer.optionalGetByEmail(email)
+              .filter(u -> Objects.nonNull(u.getEmail()))
+              .orElseGet(() -> createUser(email, name));
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
 
         return "home";
     }
@@ -40,8 +37,6 @@ public class HomePageController {
         User user = User.builder()
               .email(email)
               .name(name)
-              .joinedAnnouncements(new ArrayList<>())
-              .ownedAnnouncements(new ArrayList<>())
               .build();
         userConsumer.create(user);
         return user;
