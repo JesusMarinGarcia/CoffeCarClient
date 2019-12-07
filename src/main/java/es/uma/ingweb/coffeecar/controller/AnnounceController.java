@@ -36,7 +36,7 @@ public class AnnounceController {
             @RequestParam (name = "fechaSalida") String fsalida,
             @RequestParam (name = "fechaLlegada") String fllegada*/
             ){
-        User driver =  userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if (announcement.getDescription() == null || announcement.getDescription().isEmpty()){
             announcement.setDescription("No hay descripción");
         }
