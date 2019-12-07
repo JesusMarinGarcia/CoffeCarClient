@@ -22,17 +22,11 @@ public class HomePageController {
     public String home(OAuth2AuthenticationToken authenticationToken, Model model) {
         String email = authenticationToken.getPrincipal().getAttribute("email");
         String name = authenticationToken.getPrincipal().getAttribute("name");
-        User user;
-        try{
-            user = userConsumer.getByEmail(email);
-
-        }catch (NullPointerException e){
-
-            user = createUser(email,name);
-        }
-
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user.getEmail()));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user.getEmail()));
+        User user = userConsumer.optionalGetByEmail(email)
+              .filter(u -> Objects.nonNull(u.getEmail()))
+              .orElseGet(() -> createUser(email, name));
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(email));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
 
         return "home";
     }

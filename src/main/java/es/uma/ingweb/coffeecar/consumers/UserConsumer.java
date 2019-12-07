@@ -13,8 +13,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserConsumer {
@@ -32,16 +32,11 @@ public class UserConsumer {
     }
 
     public List<User> getAll() {
-        return restTemplateProxy.exchange(
-                URL,
-                HttpMethod.GET,
-                null,
-                getParameterizedTypeReference()
-        )
-                .map(HttpEntity::getBody).map(CollectionModel::getContent)
-                .map(Collection::stream).map(content -> content.collect(toList()))
-                .orElse(Collections.emptyList());
-
+        final ResponseEntity<PagedModel<User>> usersResponse = restTemplate
+              .exchange(GET_ALL_USERS_URL, HttpMethod.GET, null,
+                    getParameterizedTypeReference()
+              );
+        return new ArrayList<>((Objects.requireNonNull(usersResponse.getBody())).getContent());
     }
 
   /*  public User optionalGetByEmail(String email) {
