@@ -1,8 +1,10 @@
 package es.uma.ingweb.coffeecar.consumers;
 
+import es.uma.ingweb.coffeecar.RestTemplateProxy;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserConsumer {
@@ -22,34 +24,32 @@ public class UserConsumer {
 
     private final RestTemplate restTemplate;
     private final AnnouncementConsumer announcementConsumer;
-
-    public UserConsumer(RestTemplate restTemplate, AnnouncementConsumer announcementConsumer) {
+    private final RestTemplateProxy restTemplateProxy;
+    public UserConsumer(RestTemplate restTemplate, AnnouncementConsumer announcementConsumer, RestTemplateProxy restTemplateProxy) {
         this.restTemplate = restTemplate;
         this.announcementConsumer = announcementConsumer;
+        this.restTemplateProxy = restTemplateProxy;
+
     }
 
     public List<User> getAll() {
         final ResponseEntity<PagedModel<User>> usersResponse = restTemplate
               .exchange(GET_ALL_USERS_URL, HttpMethod.GET, null,
                     getParameterizedTypeReference()
-                    );
-        return new ArrayList<>(Objects.requireNonNull(usersResponse.getBody()).getContent());
+              );
+        return new ArrayList<>((usersResponse.getBody()).getContent());
     }
-    public User getByEmail(String email){
-        ResponseEntity<User> user=null;
-        try {
-            user = restTemplate
-                    .getForEntity(
-                            GET_USER_BY_EMAIL_URL,
-                            User.class,
-                            email
-                    );
-        } catch (HttpClientErrorException ex)   {
-            if (ex.getStatusCode() != HttpStatus.NOT_FOUND) {
-                throw ex;
-            }
-        }
-        return user!=null ? completeUser(Objects.requireNonNull(user.getBody())) : null;
+
+    public Optional<User> optionalGetByEmail(String email) {
+        return restTemplateProxy.getForEntity(GET_USER_BY_EMAIL_URL, User.class, email)
+              .map(HttpEntity::getBody);
+    }
+
+    public User getByEmail(String email) {
+        return comppleteUser(restTemplate.getForEntity(
+              GET_USER_BY_EMAIL_URL,
+              User.class,
+              email).getBody());
     }
 
     private User completeUser(User user){
@@ -58,17 +58,20 @@ public class UserConsumer {
         return user;
     }
 
-    public void create(User user){
+    public void create(User user) {
         restTemplate.postForEntity(URL, user, User.class);
     }
-    public void edit(User user){
+
+    public void edit(User user) {
         restTemplate.put(URL, user, User.class);
     }
-    public void delete(User user){
+
+    public void delete(User user) {
         restTemplate.delete(URL, user, User.class);
     }
 
     private static ParameterizedTypeReference<PagedModel<User>> getParameterizedTypeReference() {
-        return new ParameterizedTypeReference<>() {};
+        return new ParameterizedTypeReference<>() {
+        };
     }
 }

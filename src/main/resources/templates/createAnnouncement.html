@@ -112,7 +112,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Título</span>
             </div>
-            <input th:field="*{title}" type="text" class="form-control" aria-label="With textarea" id="title"/>
+            <input th:field="*{title}"  required="true" type="text" class="form-control" aria-label="With textarea" id="title"/>
         </div>
     </div>
 
@@ -131,13 +131,13 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Fecha salida</span>
             </div>
-            <input th:field="*{departureTime}" id="dt" type="datetime-local" name="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+            <input th:field="*{departureTime}" required="true" id="dt" type="datetime-local" name="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
         </div>
         <div class="input-group input-group mb-3" style="width: 350px; margin-left: 20px">
             <div class="input-group-prepend">
                 <span class="input-group-text">Fecha llegada</span>
             </div>
-            <input th:field="*{arrivalDate}" id="at" type="datetime-local" name="fechaLlegada" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+            <input th:field="*{arrivalDate}" required="true" id="at" type="datetime-local" name="fechaLlegada" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
         </div>
     </div>
     <div class="nav justify-content-center">
