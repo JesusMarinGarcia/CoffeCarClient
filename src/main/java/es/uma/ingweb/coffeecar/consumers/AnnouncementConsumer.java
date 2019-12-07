@@ -1,8 +1,6 @@
 package es.uma.ingweb.coffeecar.consumers;
 
 import es.uma.ingweb.coffeecar.entities.Announcement;
-import es.uma.ingweb.coffeecar.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
@@ -13,7 +11,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -112,13 +113,7 @@ public class AnnouncementConsumer {
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
 
-    public Announcement getById(long id){
-        ResponseEntity<Announcement> a = restTemplate
-                .getForEntity(
-                        GET_ANNOUNCEMENT_BY_ID.concat("?id="+id), Announcement.class
-                );
-        return a.getBody();
-    }
+
 
     public void create(Announcement announcement) {
         restTemplate.postForEntity(URL, announcement, Announcement.class);
