@@ -34,14 +34,14 @@ public class AnnouncementConsumer {
         this.restTemplateProxy = restTemplateProxy;
     }
 
-    public List<Announcement> getAll(){
+    public List<Announcement> getAvailableAnnouncements(User user){
         final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-              restTemplate.exchange(
-                    URL,
-                    HttpMethod.GET,
-                    null,
-                    getParameterizedTypeReference()
-              );
+                restTemplate.exchange(
+                        URL,
+                        HttpMethod.GET,
+                        null,
+                        getParameterizedTypeReference()
+                );
         List<Announcement> allTrips = new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
         allTrips.removeAll(getMyTrips(user));
         return allTrips;
