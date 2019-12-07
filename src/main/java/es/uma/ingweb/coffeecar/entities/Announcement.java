@@ -1,5 +1,6 @@
 package es.uma.ingweb.coffeecar.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
+@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
 @AllArgsConstructor
 public class Announcement{
     private long id;

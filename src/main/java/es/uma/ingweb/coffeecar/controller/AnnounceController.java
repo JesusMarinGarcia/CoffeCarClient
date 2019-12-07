@@ -20,12 +20,12 @@ import java.util.ArrayList;
 
 
 @Controller
-public class AnnounceControler {
+public class AnnounceController {
 
     private final AnnouncementConsumer announcementConsumer;
     private final UserConsumer userConsumer;
 
-    public AnnounceControler(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer) {
+    public AnnounceController(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer) {
         this.announcementConsumer = announcementConsumer;
         this.userConsumer = userConsumer;
     }
