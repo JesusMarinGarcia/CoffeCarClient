@@ -8,8 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.ArrayList;
-
 @Controller
 public class HomePageController {
     private final AnnouncementConsumer announcementConsumer;
@@ -24,12 +22,17 @@ public class HomePageController {
     public String home(OAuth2AuthenticationToken authenticationToken, Model model) {
         String email = authenticationToken.getPrincipal().getAttribute("email");
         String name = authenticationToken.getPrincipal().getAttribute("name");
-        User user = userConsumer.getByEmail(email);
-        if(user==null || user.getEmail()==null)
-            user = createUser(email,name);
+        User user;
+        try{
+            user = userConsumer.getByEmail(email);
 
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
+        }catch (NullPointerException e){
+
+            user = createUser(email,name);
+        }
+
+        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user.getEmail()));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user.getEmail()));
 
         return "home";
     }
@@ -38,8 +41,6 @@ public class HomePageController {
         User user = User.builder()
               .email(email)
               .name(name)
-              .joinedAnnouncements(new ArrayList<>())
-              .ownedAnnouncements(new ArrayList<>())
               .build();
         userConsumer.create(user);
         return user;

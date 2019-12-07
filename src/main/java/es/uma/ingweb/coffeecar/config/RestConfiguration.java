@@ -2,6 +2,7 @@ package es.uma.ingweb.coffeecar.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import es.uma.ingweb.coffeecar.RestTemplateProxy;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,16 @@ public class RestConfiguration {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        return getRestTemplate(builder);
+    }
+
+    @Bean
+    public RestTemplateProxy restTemplateProxy(RestTemplateBuilder builder) {
+        RestTemplate restTemplate = getRestTemplate(builder);
+        return new RestTemplateProxy(restTemplate);
+    }
+
+    private RestTemplate getRestTemplate(RestTemplateBuilder builder) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.registerModule(new Jackson2HalModule());

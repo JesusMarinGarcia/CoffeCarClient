@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +40,7 @@ public class AnnounceController {
             @RequestParam (name = "fechaSalida") String fsalida,
             @RequestParam (name = "fechaLlegada") String fllegada*/
             ){
-        User driver =  userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if (announcement.getDescription() == null || announcement.getDescription().isEmpty()){
             announcement.setDescription("No hay descripción");
         }
@@ -55,6 +53,7 @@ public class AnnounceController {
         announcement.setArrivalDate(arrivalDate);*/
 
         announcementConsumer.create(announcement);
+
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
         return "redirect:/";
