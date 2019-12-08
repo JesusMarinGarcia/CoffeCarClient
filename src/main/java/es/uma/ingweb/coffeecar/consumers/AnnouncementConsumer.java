@@ -155,7 +155,7 @@ public class AnnouncementConsumer {
     }
 
     public void delete(Announcement announcement) {
-        restTemplate.delete(URL, announcement, Announcement.class);
+        restTemplate.delete(announcement.getSelfURI());
     }
 
     public void edit(Announcement announcement) {
