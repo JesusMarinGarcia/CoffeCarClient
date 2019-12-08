@@ -23,6 +23,11 @@ public class Announcement{
     private String arrivalDate;
     private String description;
     private String arrival;
+
+    private String selfURI;
+    private String driverURI;
+    private String passengersURI;
+
     private double arrivalLatitude;
     private double arrivalLongitude;
     private double departureLatitude;

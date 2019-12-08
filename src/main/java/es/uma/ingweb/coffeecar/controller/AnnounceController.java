@@ -1,6 +1,8 @@
 package es.uma.ingweb.coffeecar.controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
 import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.Announcement;
@@ -14,18 +16,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 
 @Controller
-public class AnnounceControler {
+public class AnnounceController {
 
     private final AnnouncementConsumer announcementConsumer;
     private final UserConsumer userConsumer;
 
-    public AnnounceControler(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer) {
+    public AnnounceController(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer) {
         this.announcementConsumer = announcementConsumer;
         this.userConsumer = userConsumer;
     }
@@ -38,19 +38,22 @@ public class AnnounceControler {
             @RequestParam (name = "fechaSalida") String fsalida,
             @RequestParam (name = "fechaLlegada") String fllegada*/
             ){
-        User driver =  userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if (announcement.getDescription() == null || announcement.getDescription().isEmpty()){
             announcement.setDescription("No hay descripción");
         }
-        announcement.setDriver(driver);
-        announcement.setPassengers(new ArrayList<>());
         /*DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         LocalDateTime departureDate = LocalDateTime.parse(fsalida, formatter);
         LocalDateTime arrivalDate = LocalDateTime.parse(fllegada, formatter);
         announcement.setDepartureTime(departureDate);
         announcement.setArrivalDate(arrivalDate);*/
 
-        announcementConsumer.create(announcement);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announcement);
+        jsonNodeAnnouncement.put("driver", driver.getSelfURI());
+
+        announcement.setSelfURI(announcementConsumer.create(jsonNodeAnnouncement));
+
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
         return "redirect:/";
@@ -63,7 +66,8 @@ public class AnnounceControler {
     }
 
     @GetMapping("/announcementDetails")
-    public String announcementDetails(@RequestParam(name="announcementId") long id){
+    public String announcementDetails(@RequestParam(name="announcementURI") String URI, Model model){
+        model.addAttribute("announcement", announcementConsumer.getAnnouncementByURI(URI));
         return "announcementDetails";
     }
 }
