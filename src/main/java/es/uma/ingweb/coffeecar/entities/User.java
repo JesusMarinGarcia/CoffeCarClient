@@ -14,6 +14,10 @@ public class User {
     private long id;
     private String name;
     private String email;
+
+    private String selfURI;
+    private String ownedAnnouncementsURI;
+    private String joinedAnnouncementsURI;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Announcement> ownedAnnouncements;

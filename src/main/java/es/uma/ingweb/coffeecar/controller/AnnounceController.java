@@ -1,6 +1,8 @@
 package es.uma.ingweb.coffeecar.controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
 import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.Announcement;
@@ -40,15 +42,17 @@ public class AnnounceController {
         if (announcement.getDescription() == null || announcement.getDescription().isEmpty()){
             announcement.setDescription("No hay descripción");
         }
-        announcement.setDriver(driver);
-        announcement.setPassengers(new ArrayList<>());
         /*DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         LocalDateTime departureDate = LocalDateTime.parse(fsalida, formatter);
         LocalDateTime arrivalDate = LocalDateTime.parse(fllegada, formatter);
         announcement.setDepartureTime(departureDate);
         announcement.setArrivalDate(arrivalDate);*/
 
-        announcementConsumer.create(announcement);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announcement);
+        jsonNodeAnnouncement.put("driver", driver.getSelfURI());
+
+        announcement.setSelfURI(announcementConsumer.create(jsonNodeAnnouncement));
 
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
@@ -62,7 +66,8 @@ public class AnnounceController {
     }
 
     @GetMapping("/announcementDetails")
-    public String announcementDetails(@RequestParam(name="announcementId") long id){
+    public String announcementDetails(@RequestParam(name="announcementURI") String URI, Model model){
+        model.addAttribute("announcement", announcementConsumer.getAnnouncementByURI(URI));
         return "announcementDetails";
     }
 }
