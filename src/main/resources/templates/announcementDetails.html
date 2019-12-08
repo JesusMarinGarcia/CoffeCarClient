@@ -61,7 +61,7 @@
     </form>
     </div>
     <div class="nav container-fluid justify-content-center">
-    <form th:action="" method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%" >
+    <form th:action="@{announcementDelete}" method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%" >
         <input type="submit" value="Eliminar" class="btn btn-danger btn-lg btn-block">
     </form>
     </div>
@@ -72,7 +72,7 @@
         <input type="submit" value="Abandonar viaje" class="btn btn-dark btn-lg btn-block">
     </form>
 </div>
-<div th:if="${isPassenger} == false" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
+<div th:if="${isPassenger} == false && ${announcement.getPassengers().size()} < ${announcement.getSeats()}" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
     <form th:action="" method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
         <input type="submit" value="Unirse al viaje" class="btn btn-primary btn-lg btn-block">
     </form>
@@ -109,10 +109,13 @@
     </div>
     <div class="nav container-fluid justify-content-center" id="pasajeros" style="display: none; margin-top: 2%; margin-bottom: 1%; padding-left: 5%; padding-right: 5%; width: 50%">
         <ul class="list-group">
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                Cras justo odio
-                <button th:if="${isDriver == true}" class="btn btn-danger btn-sm">Eliminar</button>
-            </li>
+            <tr th:each="passenger : ${announcement.getPassengers()}">
+                <td>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <p th:text="${passenger.getName()}"></p>
+                    </li>
+                </td>
+            </tr>
         </ul>
     </div>
 </div>
