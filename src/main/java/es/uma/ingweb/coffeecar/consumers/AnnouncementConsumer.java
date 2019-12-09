@@ -83,26 +83,26 @@ public class AnnouncementConsumer {
               .orElseGet(Collections::emptyList);
     }
 
-    public List<Announcement> getByDriver(User user) {
+    public List<Announcement> getByDriver(String email) {
         return restTemplateProxy.exchange(
               GET_ANNOUNCEMENTS_BY_DRIVER_URL,
               HttpMethod.GET,
               null,
               getParameterizedTypeReference(),
-              user)
+              email)
               .map(HttpEntity::getBody).map(CollectionModel::getContent)
               .map(Collection::stream).map(content -> content.collect(toList()))
               .orElse(Collections.emptyList());
     }
 
-    public List<Announcement> getByPassenger(User user) {
+    public List<Announcement> getByPassenger(String email) {
         return
               restTemplateProxy.exchange(
                     GET_ANNOUNCEMENTS_BY_PASSENGER_URL,
                     HttpMethod.GET,
                     null,
                     getParameterizedTypeReference(),
-                    user)
+                    email)
                     .map(HttpEntity::getBody).map(CollectionModel::getContent)
                     .map(Collection::stream).map(content -> content.collect(toList()))
                     .orElse(Collections.emptyList());
@@ -155,7 +155,7 @@ public class AnnouncementConsumer {
     }
 
     public void delete(Announcement announcement) {
-        restTemplate.delete(URL, announcement, Announcement.class);
+        restTemplate.delete(announcement.getSelfURI());
     }
 
     public void edit(Announcement announcement) {
