@@ -1,77 +1,65 @@
 package es.uma.ingweb.coffeecar.consumers;
 
 import es.uma.ingweb.coffeecar.RestTemplateProxy;
+import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.hateoas.client.Traverson;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+
+import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
 @Service
 public class UserConsumer {
-    private static final String URL = "http://localhost:8080/users";
-    private static final String GET_ALL_USERS_URL = "http://localhost:8080/users";
-    private static final String GET_USER_BY_EMAIL_URL = "http://localhost:8080/users/search/findUserByEmail?email={email}";
+    private static final String URL = "http://localhost:8080/api/users";
 
     private final RestTemplate restTemplate;
-    private final RestTemplateProxy restTemplateProxy;
-    public UserConsumer(RestTemplate restTemplate, RestTemplateProxy restTemplateProxy) {
-        this.restTemplate = restTemplate;
-        this.restTemplateProxy = restTemplateProxy;
-    }
+    private final Traverson traverson;
 
-    public List<User> getAll() {
-        final ResponseEntity<PagedModel<User>> usersResponse = restTemplate
-              .exchange(GET_ALL_USERS_URL, HttpMethod.GET, null,
-                    getParameterizedTypeReference()
-              );
-        return new ArrayList<>((Objects.requireNonNull(usersResponse.getBody())).getContent());
+    public UserConsumer(RestTemplate restTemplate, RestTemplateProxy restTemplateProxy, Traverson traverson) {
+        this.restTemplate = restTemplate;
+        this.traverson = traverson;
     }
 
     public Optional<User> optionalGetByEmail(String email) {
-        return restTemplateProxy
-                .getForEntity(
-                        GET_USER_BY_EMAIL_URL,
-                        User.class,
-                        email
-                ).map(ResponseEntity::getBody);
+        Optional<User> response = Optional.empty();
+        try {
+            User user = getByEmail(email);
+            response = Optional.of(user);
+        } catch (Exception ignored) {
+            System.out.printf("not found :(");
+        }
+
+        return response;
     }
 
     public User getByEmail(String email) {
-        ResponseEntity<EntityModel<User>> userResponseEntity = restTemplate
-                .exchange(
-                        GET_USER_BY_EMAIL_URL,
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<EntityModel<User>>() {
-                        },
-                        email);
-
-        return setURIs(userResponseEntity.getBody());
+        Traverson.TraversalBuilder traversalBuilder = traverson.follow("users").follow("search").follow("findUserByEmail")
+              .withTemplateParameters(Map.of("email", email));
+        EntityModel<User> userEntityModel = traversalBuilder.toObject(getEntityModelParameterizedTypeReference());
+        User user = userEntityModel.getContent();
+        String ownedAnnouncesLink = userEntityModel.getLink("ownedAnnounces").get().getHref();
+        String joinedAnnouncesLink = userEntityModel.getLink("joinedAnnounces").get().getHref();
+        user.setOwnedAnnounces(getAnnounces(URI.create(ownedAnnouncesLink), "ownedAnnounces"));
+        user.setJoinedAnnounces(getAnnounces(URI.create(joinedAnnouncesLink), "joinedAnnounces"));
+        return user;
     }
 
-    public User setURIs(EntityModel<User> resourceUser){
-        User user = Objects.requireNonNull(resourceUser).getContent();
-        Optional<Link> teacherLink = Objects.requireNonNull(resourceUser).getLink("self");
-        Optional<Link> teacherOwnedAnnounces = Objects.requireNonNull(resourceUser).getLink("ownedAnnounces");
-        Optional<Link> teacherJoinedAnnounces = Objects.requireNonNull(resourceUser).getLink("joinedAnnounces");
+    private List<Announce> getAnnounces(URI url, String relation) {
+        Collection<Announce> announces = new Traverson(url, HAL_JSON).follow("self").toObject(getAnnounceCollectionType()).getContent();
+        return new ArrayList<>(announces);
+    }
 
-        Objects.requireNonNull(user).setSelfURI(teacherLink.map(Link::getHref).get());
-        Objects.requireNonNull(user).setOwnedAnnouncementsURI(teacherOwnedAnnounces.map(Link::getHref).get());
-        Objects.requireNonNull(user).setOwnedAnnouncementsURI(teacherJoinedAnnounces.map(Link::getHref).get());
-
-        return user;
+    private ParameterizedTypeReference<CollectionModel<Announce>> getAnnounceCollectionType() {
+        return new ParameterizedTypeReference<CollectionModel<Announce>>() {
+        };
     }
 
     public void create(User user) {
@@ -87,6 +75,11 @@ public class UserConsumer {
     }
 
     private static ParameterizedTypeReference<PagedModel<User>> getParameterizedTypeReference() {
+        return new ParameterizedTypeReference<>() {
+        };
+    }
+
+    private static ParameterizedTypeReference<EntityModel<User>> getEntityModelParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {
         };
     }

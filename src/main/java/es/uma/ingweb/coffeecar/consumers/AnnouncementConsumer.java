@@ -2,7 +2,7 @@ package es.uma.ingweb.coffeecar.consumers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import es.uma.ingweb.coffeecar.RestTemplateProxy;
-import es.uma.ingweb.coffeecar.entities.Announcement;
+import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
@@ -37,30 +37,31 @@ public class AnnouncementConsumer {
         this.restTemplateProxy = restTemplateProxy;
     }
 
-    public Announcement getAnnouncementByURI(String uri){
-        ResponseEntity<EntityModel<Announcement>> announcementResponseEntity = restTemplate
-                .exchange(
-                        uri,
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<EntityModel<Announcement>>() {}
-                        );
+    public Announce getAnnouncementByURI(String uri) {
+        ResponseEntity<EntityModel<Announce>> announcementResponseEntity = restTemplate
+              .exchange(
+                    uri,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<EntityModel<Announce>>() {
+                    }
+              );
         return setURIs(announcementResponseEntity.getBody());
     }
 
-    private Announcement setURIs(EntityModel<Announcement> resourceAnnouncement){
-        Announcement announcement = Objects.requireNonNull(resourceAnnouncement).getContent();
+    private Announce setURIs(EntityModel<Announce> resourceAnnouncement) {
+        Announce announce = Objects.requireNonNull(resourceAnnouncement).getContent();
         Optional<Link> driver = Objects.requireNonNull(resourceAnnouncement).getLink("driver");
         Optional<Link> passengers = Objects.requireNonNull(resourceAnnouncement).getLink("passengers");
 
-        Objects.requireNonNull(announcement).setDriverURI(driver.map(Link::getHref).get());
-        Objects.requireNonNull(announcement).setPassengersURI(passengers.map(Link::getHref).get());
+        Objects.requireNonNull(announce).setDriverURI(driver.map(Link::getHref).get());
+        Objects.requireNonNull(announce).setPassengersURI(passengers.map(Link::getHref).get());
 
-        return announcement;
+        return announce;
     }
 
-    public List<Announcement> getAll() {
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+    public List<Announce> getAll() {
+        final ResponseEntity<PagedModel<Announce>> announcementResponse =
               restTemplate.exchange(
                     URL,
                     HttpMethod.GET,
@@ -70,7 +71,7 @@ public class AnnouncementConsumer {
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
 
-    public List<Announcement> getAvailableAnnouncements(String email) {
+    public List<Announce> getAvailableAnnouncements(String email) {
         return restTemplateProxy.exchange(
               URL + "/search/findAvailableAnnounces?email={email}",
               HttpMethod.GET,
@@ -83,7 +84,7 @@ public class AnnouncementConsumer {
               .orElseGet(Collections::emptyList);
     }
 
-    public List<Announcement> getByDriver(User user) {
+    public List<Announce> getByDriver(User user) {
         return restTemplateProxy.exchange(
               GET_ANNOUNCEMENTS_BY_DRIVER_URL,
               HttpMethod.GET,
@@ -95,7 +96,7 @@ public class AnnouncementConsumer {
               .orElse(Collections.emptyList());
     }
 
-    public List<Announcement> getByPassenger(User user) {
+    public List<Announce> getByPassenger(User user) {
         return
               restTemplateProxy.exchange(
                     GET_ANNOUNCEMENTS_BY_PASSENGER_URL,
@@ -108,7 +109,7 @@ public class AnnouncementConsumer {
                     .orElse(Collections.emptyList());
     }
 
-    public List<Announcement> getMyTrips(String email) {
+    public List<Announce> getMyTrips(String email) {
         return restTemplateProxy.exchange(
               URL + "/findUserTrips?email=email",
               HttpMethod.GET,
@@ -120,13 +121,13 @@ public class AnnouncementConsumer {
               .orElse(Collections.emptyList());
     }
 
-    private List<Announcement> sortByDepartureDate(List<Announcement> announcementList) {
-        announcementList.sort(Comparator.comparing(Announcement::getDepartureTime));
-        return announcementList;
+    private List<Announce> sortByDepartureDate(List<Announce> announceList) {
+        announceList.sort(Comparator.comparing(Announce::getDepartureTime));
+        return announceList;
     }
 
-    public List<Announcement> getByArrivalDate(LocalDateTime arrivalDate) {
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+    public List<Announce> getByArrivalDate(LocalDateTime arrivalDate) {
+        final ResponseEntity<PagedModel<Announce>> announcementResponse =
               restTemplate.exchange(
                     GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL,
                     HttpMethod.GET,
@@ -137,8 +138,8 @@ public class AnnouncementConsumer {
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
 
-    public List<Announcement> getByArrival(String arrival) {
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
+    public List<Announce> getByArrival(String arrival) {
+        final ResponseEntity<PagedModel<Announce>> announcementResponse =
               restTemplate.exchange(
                     GET_ANNOUNCEMENTS_BY_ARRIVAL_URL,
                     HttpMethod.GET,
@@ -154,15 +155,15 @@ public class AnnouncementConsumer {
         return Objects.requireNonNull(uri).getPath();
     }
 
-    public void delete(Announcement announcement) {
-        restTemplate.delete(announcement.getSelfURI());
+    public void delete(Announce announce) {
+        restTemplate.delete(announce.getSelfURI());
     }
 
-    public void edit(Announcement announcement) {
-        restTemplate.put(URL, announcement, Announcement.class);
+    public void edit(Announce announce) {
+        restTemplate.put(URL, announce, Announce.class);
     }
 
-    private static ParameterizedTypeReference<PagedModel<Announcement>> getParameterizedTypeReference() {
+    private static ParameterizedTypeReference<PagedModel<Announce>> getParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {
         };
     }
