@@ -13,6 +13,26 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
 
+    <script src='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.js'></script>
+    <link href='https://api.mapbox.com/mapbox.js/v3.2.1/mapbox.css' rel='stylesheet' />
+
+    <style>
+        .lbl{
+            margin-top: 7%;
+        }
+    </style>
+
+    <script>
+        function mostarOcultarPasajeros() {
+            var lista = document.getElementById("pasajeros");
+            if(lista.style.display == "block"){
+                lista.style.display = "none"
+            }else{
+                lista.style.display = "block"
+            }
+        }
+    </script>
+
     <title>Anuncio</title>
 </head>
 <body>
@@ -34,12 +54,72 @@
     </div>
 </nav>
 <br>
+<div th:if="${isDriver} == true" style="padding-left: 5%; padding-right: 5%;">
+    <div class="nav container-fluid justify-content-center">
+    <form  method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%">
+        <input type="submit" value="Editar" class="btn btn-success btn-lg btn-block">
+    </form>
+    </div>
+    <div class="nav container-fluid justify-content-center">
+    <form th:action="@{announcementDelete}" method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%" >
+        <input type="submit" value="Eliminar" class="btn btn-danger btn-lg btn-block">
+    </form>
+    </div>
+</div>
 
-<div class="nav container-fluid justify-content-center">
-    <img th:src="@{CoffeeCarLogo.png}" src="../static/CoffeeCarLogo.png" alt="..." style="max-width: 35%; max-height: 35%;">
+<div th:if="${isPassenger} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
+    <form  method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+        <input type="submit" value="Abandonar viaje" class="btn btn-dark btn-lg btn-block">
+    </form>
+</div>
+<div th:if="${isPassenger} == false && ${announcement.getSeats()} > ${announcement.getPassengers().size()}" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
+    <form  method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+        <input type="submit" value="Unirse al viaje" class="btn btn-primary btn-lg btn-block">
+    </form>
+</div>
+
+<div class="nav container-fluid justify-content-center" style="margin-top: 2% ;padding-left: 5%; padding-right: 5%; height: 350px">
+    <img th:src="${announcement.getImgLink()}" src="../static/CoffeeCarLogo.png" alt="..." style="width: 80%; max-height: 100%; border: 2px black">
+</div>
+<div class="container-fluid text-center" style="padding-left: 5%; padding-right: 5%; margin-top: 2%">
+    <h1>Título</h1>
+    <br>
+    <div class="row" th:object="${announcement}">
+        <div class="col-sm-4">
+            <h5>¿Quién viaja?</h5>
+            <h6 class="lbl justify">Conductor</h6>
+            <p class="justify" th:text="*{driver.getName()}"></p>
+            <h6 class="lbl justify">Asientos ocupados/total</h6>
+            <p class="justify lbl" th:text="*{seats}"></p>
+            <button class="btn btn-secondary btn-sm" onclick="mostarOcultarPasajeros()" id="mostrar">Mostrar pasajeros
+            </button>
+        </div>
+        <br>
+        <div class="col-sm-4">
+            <h5>¿Cuándo?</h5>
+            <h6 class="lbl justify">Fecha de salida</h6>
+            <p class="justify" th:text="*{departureTime}"></p>
+            <h6 class="lbl justify">Fecha de vuelta</h6>
+            <p class="justify" th:text="*{arrivalDate}"></p>
+        </div>
+        <div class="col-sm-4">
+            <h5>Descripción</h5>
+            <p class="justify lbl" th:text="*{description}"></p>
+        </div>
+    </div>
+    <div class="nav container-fluid justify-content-center" id="pasajeros" style="display: none; margin-top: 2%; margin-bottom: 1%; padding-left: 5%; padding-right: 5%; width: 50%">
+        <ul class="list-group">
+            <tr th:each="passenger : ${announcement.getPassengers()}">
+                <td>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <p th:text="${passenger.getName()}"></p>
+                    </li>
+                </td>
+            </tr>
+        </ul>
+    </div>
 </div>
 <br>
-
 
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
 <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.css' type='text/css' />
@@ -55,45 +135,56 @@
     <div id='map' style='width: 45%; height: 300px; border: 4px solid lightsteelblue'></div>
     <div id="mapDes" style="width: 45%; height: 300px; margin-left: 20px; border: 4px solid indianred"></div>
 </div>
+</div>
+<br>
+<script th:inline="javascript">
+    var lati = /*[[${announcement.departureLatitude}]]*/ 1.1;
+    var longi = /*[[${announcement.getDepartureLongitude}]]*/ 1.1;
 
-<script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [-4.42034, 36.72016],
-        zoom: 11
-    });
+    L.mapbox.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
+    var map = L.mapbox.map('map')
+        .setView([lati,longi], 12)
+        .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
-    map.addControl(new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl
-    }));
+    var stops = /*[[${paradas}]]*/ [];
 
-    map.addControl(new mapboxgl.NavigationControl());
-
-    map.addControl(new mapboxgl.GeolocateControl({
-        positionOptions: {
-            enableHighAccuracy: true
-        },
-        trackUserLocation: true
-    }));
-
-
-    var marker = new mapboxgl.Marker({
+    stops.forEach(function (parada, index) {
+        L.marker([parada.lat, parada.lon], {
+            icon: L.mapbox.marker.icon({
+                'marker-size': 'small',
+                'marker-symbol': 'bus',
+                'marker-color': '#FF3633'
+            })
+        }).addTo(map);
+        marker.bindPopup("<b>Linea " +  parada.codLinea  + "</b><br>Parada " + parada.codParada)
     })
-        .setLngLat([-4.42034, 36.72016])
-        .addTo(map);
 
+    L.marker([lati, longi], {
+        icon: L.mapbox.marker.icon({
+            'marker-size': 'large',
+            'marker-symbol': 'car',
+            'marker-color': '#3ab3da'
+        })
+    }).addTo(map);
 
+    /*L.marker([36.75016, -4.42034], {
+        icon: L.mapbox.marker.icon({
+            'marker-size': 'small',
+            'marker-symbol': 'bus',
+            'marker-color': '#FF3633'
+        })
+    }).addTo(map);*/
 </script>
 
-<script>
+<script th:inline="javascript">
+    var lo = /*[[${announcement.arrivalLongitude}]]*/ 1.1;
+    var la = /*[[${announcement.arrivalLatitude}]]*/ 1.1;
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
     var mapDes = new mapboxgl.Map({
         container: 'mapDes',
         style: 'mapbox://styles/mapbox/streets-v11',
-        center: [-4.42034, 36.72016],
+        center: [lo, la],
         zoom: 11
     });
 
@@ -112,22 +203,18 @@
     }));
 
 
-    var strDes, strLatDes, strLongDes;
+
 
     var markerDes = new mapboxgl.Marker({
     })
-        .setLngLat([-4.42034, 36.72016])
+        .setLngLat([lo,la])
         .addTo(mapDes);
 
 
 
 </script>
 
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
 
 
 </body>
