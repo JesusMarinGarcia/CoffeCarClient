@@ -56,7 +56,7 @@
 <br>
 <div th:if="${isDriver} == true" style="padding-left: 5%; padding-right: 5%;">
     <div class="nav container-fluid justify-content-center">
-    <form th:action="" method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%">
+    <form  method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%">
         <input type="submit" value="Editar" class="btn btn-success btn-lg btn-block">
     </form>
     </div>
@@ -68,27 +68,27 @@
 </div>
 
 <div th:if="${isPassenger} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
-    <form th:action="" method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+    <form  method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
         <input type="submit" value="Abandonar viaje" class="btn btn-dark btn-lg btn-block">
     </form>
 </div>
-<div th:if="${isPassenger} == false && ${announcement.getPassengers().size()} < ${announcement.getSeats()}" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
-    <form th:action="" method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+<div th:if="${isPassenger} == false && ${announcement.getSeats()} > ${announcement.getPassengers().size()}" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
+    <form  method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
         <input type="submit" value="Unirse al viaje" class="btn btn-primary btn-lg btn-block">
     </form>
 </div>
 
-<div class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; height: 350px">
-    <img th:src="${announcement.getImgLink()}" src="../static/CoffeeCarLogo.png" alt="..." style="max-width: 100%; max-height: 100%">
+<div class="nav container-fluid justify-content-center" style="margin-top: 2% ;padding-left: 5%; padding-right: 5%; height: 350px">
+    <img th:src="${announcement.getImgLink()}" src="../static/CoffeeCarLogo.png" alt="..." style="width: 80%; max-height: 100%; border: 2px black">
 </div>
-<div class="container-fluid text-center" style="padding-left: 5%; padding-right: 5%">
+<div class="container-fluid text-center" style="padding-left: 5%; padding-right: 5%; margin-top: 2%">
     <h1>Título</h1>
     <br>
     <div class="row" th:object="${announcement}">
         <div class="col-sm-4">
             <h5>¿Quién viaja?</h5>
             <h6 class="lbl justify">Conductor</h6>
-            <p class="justify" th:text="*{driver.name}"></p>
+            <p class="justify" th:text="*{driver.getName()}"></p>
             <h6 class="lbl justify">Asientos ocupados/total</h6>
             <p class="justify lbl" th:text="*{seats}"></p>
             <button class="btn btn-secondary btn-sm" onclick="mostarOcultarPasajeros()" id="mostrar">Mostrar pasajeros
@@ -138,9 +138,12 @@
 </div>
 <br>
 <script th:inline="javascript">
+    var lati = /*[[${announcement.departureLatitude}]]*/ 1.1;
+    var longi = /*[[${announcement.getDepartureLongitude}]]*/ 1.1;
+
     L.mapbox.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
     var map = L.mapbox.map('map')
-        .setView([36.72016, -4.42034], 12)
+        .setView([lati,longi], 12)
         .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
     var stops = /*[[${paradas}]]*/ [];
@@ -156,7 +159,7 @@
         marker.bindPopup("<b>Linea " +  parada.codLinea  + "</b><br>Parada " + parada.codParada)
     })
 
-    L.marker([/*[[${announcement.departureLatitude}]]*/, /*[[${announcement.getDepartureLongitude}]]*/], {
+    L.marker([lati, longi], {
         icon: L.mapbox.marker.icon({
             'marker-size': 'large',
             'marker-symbol': 'car',
@@ -174,11 +177,14 @@
 </script>
 
 <script th:inline="javascript">
+    var lo = /*[[${announcement.arrivalLongitude}]]*/ 1.1;
+    var la = /*[[${announcement.arrivalLatitude}]]*/ 1.1;
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
     var mapDes = new mapboxgl.Map({
         container: 'mapDes',
         style: 'mapbox://styles/mapbox/streets-v11',
-        center: [-4.42034, 36.72016],
+        center: [lo, la],
         zoom: 11
     });
 
@@ -197,11 +203,11 @@
     }));
 
 
-    var strDes, strLatDes, strLongDes;
+
 
     var markerDes = new mapboxgl.Marker({
     })
-        .setLngLat([/*[[${announcement.arrivalLongitude}]]*/, /*[[${announcement.arrivalLatitude}]]*/])
+        .setLngLat([lo,la])
         .addTo(mapDes);
 
 

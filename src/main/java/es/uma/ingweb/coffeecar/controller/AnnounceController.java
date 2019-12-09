@@ -37,20 +37,12 @@ public class AnnounceController {
     public String announce(
             @ModelAttribute Announcement announcement,
             OAuth2AuthenticationToken authenticationToken,
-            RedirectAttributes redirectAttrs/*,
-            @RequestParam (name = "fechaSalida") String fsalida,
-            @RequestParam (name = "fechaLlegada") String fllegada*/
+            RedirectAttributes redirectAttrs
             ){
         User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if (announcement.getDescription() == null || announcement.getDescription().isEmpty()){
             announcement.setDescription("No hay descripción");
         }
-        /*DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-        LocalDateTime departureDate = LocalDateTime.parse(fsalida, formatter);
-        LocalDateTime arrivalDate = LocalDateTime.parse(fllegada, formatter);
-        announcement.setDepartureTime(departureDate);
-        announcement.setArrivalDate(arrivalDate);*/
-
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announcement);
         jsonNodeAnnouncement.put("driver", driver.getSelfURI());
@@ -83,8 +75,8 @@ public class AnnounceController {
         boolean isPassenger = announcement.getPassengers().contains(user);
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
-        model.addAttribute("announcement",announcement);
-        model.addAttribute("paradas",stops);
+        model.addAttribute("announcement", announcement);
+        model.addAttribute("paradas", stops);
         return "announcementDetails";
     }
 
