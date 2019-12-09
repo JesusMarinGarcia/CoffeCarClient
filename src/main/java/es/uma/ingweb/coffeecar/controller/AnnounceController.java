@@ -65,16 +65,20 @@ public class AnnounceController {
         model.addAttribute("announcement", announcementConsumer.getAnnouncementByURI(URI));
         return "announcementDetails";
     }
-
+// metodo al querer editar un anuncio
     @GetMapping("/editAnnouncement")
     public String editAnnouncement(@ModelAttribute Announcement announcement, Model model){
         model.addAttribute("announcement", announcement);
         return "editAnnouncement";
     }
-
+//metodo cuando se modifica el anuncio
     @PutMapping("/editAnnouncement/confirm")
-    public String changeAnnouncement(@ModelAttribute Announcement announcement){
+    public String changeAnnouncement(@ModelAttribute Announcement announcement, RedirectAttributes redirectAttrs){
+        if (announcement.getDescription() == null || announcement.getDescription().isEmpty()) {
+            announcement.setDescription("No hay descripción");
+        }
         announcementConsumer.edit(announcement);
-        return "home";
+        redirectAttrs.addFlashAttribute("mensaje", "Cambiado correctamente");
+        return "announcementDetails";
     }
 }
