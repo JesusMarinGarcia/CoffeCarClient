@@ -10,13 +10,8 @@ import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.ArrayList;
 
 
 @Controller
@@ -69,5 +64,17 @@ public class AnnounceController {
     public String announcementDetails(@RequestParam(name="announcementURI") String URI, Model model){
         model.addAttribute("announcement", announcementConsumer.getAnnouncementByURI(URI));
         return "announcementDetails";
+    }
+
+    @GetMapping("/editAnnouncement")
+    public String editAnnouncement(@ModelAttribute Announcement announcement, Model model){
+        model.addAttribute("announcement", announcement);
+        return "editAnnouncement";
+    }
+
+    @PutMapping("/editAnnouncement/confirm")
+    public String changeAnnouncement(@ModelAttribute Announcement announcement){
+        announcementConsumer.edit(announcement);
+        return "home";
     }
 }
