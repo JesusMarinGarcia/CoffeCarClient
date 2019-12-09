@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -16,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
 @AllArgsConstructor
-public class Announcement{
+public class Announcement extends RepresentationModel<Announcement>{
     private long id;
     private String title;
     private String departureTime;
@@ -24,9 +25,9 @@ public class Announcement{
     private String description;
     private String arrival;
 
-    private String selfURI;
+   /* private String selfURI;
     private String driverURI;
-    private String passengersURI;
+    private String passengersURI;*/
 
     private double arrivalLatitude;
     private double arrivalLongitude;

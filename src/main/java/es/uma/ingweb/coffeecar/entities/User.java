@@ -2,6 +2,7 @@ package es.uma.ingweb.coffeecar.entities;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.List;
 
@@ -10,14 +11,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User extends RepresentationModel<User> {
     private long id;
     private String name;
     private String email;
 
-    private String selfURI;
-    private String ownedAnnouncementsURI;
-    private String joinedAnnouncementsURI;
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Announcement> ownedAnnouncements;

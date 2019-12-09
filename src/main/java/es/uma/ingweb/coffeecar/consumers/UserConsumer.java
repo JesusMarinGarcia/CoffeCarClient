@@ -57,21 +57,11 @@ public class UserConsumer {
                         new ParameterizedTypeReference<EntityModel<User>>() {
                         },
                         email);
-
-        return setURIs(userResponseEntity.getBody());
-    }
-
-    public User setURIs(EntityModel<User> resourceUser){
-        User user = Objects.requireNonNull(resourceUser).getContent();
-        Optional<Link> teacherLink = Objects.requireNonNull(resourceUser).getLink("self");
-        Optional<Link> teacherOwnedAnnounces = Objects.requireNonNull(resourceUser).getLink("ownedAnnounces");
-        Optional<Link> teacherJoinedAnnounces = Objects.requireNonNull(resourceUser).getLink("joinedAnnounces");
-
-        Objects.requireNonNull(user).setSelfURI(teacherLink.map(Link::getHref).get());
-        Objects.requireNonNull(user).setOwnedAnnouncementsURI(teacherOwnedAnnounces.map(Link::getHref).get());
-        Objects.requireNonNull(user).setOwnedAnnouncementsURI(teacherJoinedAnnounces.map(Link::getHref).get());
-
+        EntityModel<User> userEntityModel = userResponseEntity.getBody();
+        User user = Objects.requireNonNull(userEntityModel).getContent();
+        Objects.requireNonNull(user).add(userEntityModel.getLinks());
         return user;
+
     }
 
     public void create(User user) {

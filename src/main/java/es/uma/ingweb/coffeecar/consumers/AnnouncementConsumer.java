@@ -1,6 +1,7 @@
 package es.uma.ingweb.coffeecar.consumers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.uma.ingweb.coffeecar.RestTemplateProxy;
 import es.uma.ingweb.coffeecar.entities.Announcement;
 import es.uma.ingweb.coffeecar.entities.User;
@@ -45,18 +46,7 @@ public class AnnouncementConsumer {
                         null,
                         new ParameterizedTypeReference<EntityModel<Announcement>>() {}
                         );
-        return setURIs(announcementResponseEntity.getBody());
-    }
-
-    private Announcement setURIs(EntityModel<Announcement> resourceAnnouncement){
-        Announcement announcement = Objects.requireNonNull(resourceAnnouncement).getContent();
-        Optional<Link> driver = Objects.requireNonNull(resourceAnnouncement).getLink("driver");
-        Optional<Link> passengers = Objects.requireNonNull(resourceAnnouncement).getLink("passengers");
-
-        Objects.requireNonNull(announcement).setDriverURI(driver.map(Link::getHref).get());
-        Objects.requireNonNull(announcement).setPassengersURI(passengers.map(Link::getHref).get());
-
-        return announcement;
+        return Objects.requireNonNull(announcementResponseEntity.getBody()).getContent();
     }
 
     public List<Announcement> getAll() {
@@ -149,13 +139,12 @@ public class AnnouncementConsumer {
         return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
     }
 
-    public String create(JsonNode announcement) {
-        URI uri = restTemplate.postForLocation(URL, announcement);
-        return Objects.requireNonNull(uri).getPath();
+    public void create(ObjectNode announcement) {
+        restTemplate.postForLocation(URL, announcement);
     }
 
     public void delete(Announcement announcement) {
-        restTemplate.delete(announcement.getSelfURI());
+        restTemplate.delete(announcement.getLink("self").map(Link::getHref).get());
     }
 
     public void edit(Announcement announcement) {
