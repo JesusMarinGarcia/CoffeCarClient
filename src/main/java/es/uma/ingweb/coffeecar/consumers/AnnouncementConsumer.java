@@ -1,10 +1,10 @@
 package es.uma.ingweb.coffeecar.consumers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.uma.ingweb.coffeecar.RestTemplateProxy;
 import es.uma.ingweb.coffeecar.entities.Announcement;
 import es.uma.ingweb.coffeecar.entities.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -16,9 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -31,6 +31,8 @@ public class AnnouncementConsumer {
     private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival?arrival={arrival}";
 
     private final RestTemplate restTemplate;
+    @Autowired
+    private static UserConsumer userConsumer;
     private final RestTemplateProxy restTemplateProxy;
 
     public AnnouncementConsumer(RestTemplate restTemplate, RestTemplateProxy restTemplateProxy) {
@@ -50,18 +52,53 @@ public class AnnouncementConsumer {
     }
 
     public List<Announcement> getAll() {
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-              restTemplate.exchange(
-                    URL,
-                    HttpMethod.GET,
-                    null,
-                    getParameterizedTypeReference()
-              );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+        return setParams(restTemplateProxy.exchange(
+                URL,
+                HttpMethod.GET,
+                null,
+                getParameterizedTypeReference()
+        )
+                .map(HttpEntity::getBody).map(CollectionModel::getContent)
+                .map(Collection::stream).map(content -> content.collect(toList()))
+                .orElseGet(Collections::emptyList));
+    }
+    }
+
+    private static Announcement setParams(Announcement announcement){
+        announcement.setDriver(userConsumer.getUser(announcement.getLink("driver").map(Link::getHref).get()));
+        announcement.setPassengers(userConsumer.getPassengers(announcement.getLink("passenger").map(Link::getHref).get()));
+        return announcement;
+    }
+
+    private List<Announcement> setParams(List<Announcement> announcements){
+        return announcements.stream().map(AnnouncementConsumer::setParams).collect(Collectors.toList());
+    }
+
+    public List<Announcement> getJoinedAnnouncements(String uri){
+        return setParams(restTemplateProxy.exchange(
+                uri,
+                HttpMethod.GET,
+                null,
+                getParameterizedTypeReference()
+        )
+                .map(HttpEntity::getBody).map(CollectionModel::getContent)
+                .map(Collection::stream).map(content -> content.collect(toList()))
+                .orElseGet(Collections::emptyList));
+    }
+    public List<Announcement> getOwnedAnnouncements(String uri){
+        return setParams(restTemplateProxy.exchange(
+                uri,
+                HttpMethod.GET,
+                null,
+                getParameterizedTypeReference()
+        )
+                .map(HttpEntity::getBody).map(CollectionModel::getContent)
+                .map(Collection::stream).map(content -> content.collect(toList()))
+                .orElseGet(Collections::emptyList));
     }
 
     public List<Announcement> getAvailableAnnouncements(String email) {
-        return restTemplateProxy.exchange(
+        return setParams(restTemplateProxy.exchange(
               URL + "/search/findAvailableAnnounces?email={email}",
               HttpMethod.GET,
               null,
@@ -70,11 +107,11 @@ public class AnnouncementConsumer {
         )
               .map(HttpEntity::getBody).map(CollectionModel::getContent)
               .map(Collection::stream).map(content -> content.collect(toList()))
-              .orElseGet(Collections::emptyList);
+              .orElseGet(Collections::emptyList));
     }
 
     public List<Announcement> getByDriver(String email) {
-        return restTemplateProxy.exchange(
+        return setParams(restTemplateProxy.exchange(
               GET_ANNOUNCEMENTS_BY_DRIVER_URL,
               HttpMethod.GET,
               null,
@@ -82,12 +119,12 @@ public class AnnouncementConsumer {
               email)
               .map(HttpEntity::getBody).map(CollectionModel::getContent)
               .map(Collection::stream).map(content -> content.collect(toList()))
-              .orElse(Collections.emptyList());
+              .orElse(Collections.emptyList()));
     }
 
     public List<Announcement> getByPassenger(String email) {
         return
-              restTemplateProxy.exchange(
+              setParams(restTemplateProxy.exchange(
                     GET_ANNOUNCEMENTS_BY_PASSENGER_URL,
                     HttpMethod.GET,
                     null,
@@ -95,11 +132,11 @@ public class AnnouncementConsumer {
                     email)
                     .map(HttpEntity::getBody).map(CollectionModel::getContent)
                     .map(Collection::stream).map(content -> content.collect(toList()))
-                    .orElse(Collections.emptyList());
+                    .orElse(Collections.emptyList()));
     }
 
     public List<Announcement> getMyTrips(String email) {
-        return restTemplateProxy.exchange(
+        return setParams(restTemplateProxy.exchange(
               URL + "/findUserTrips?email=email",
               HttpMethod.GET,
               null,
@@ -107,7 +144,7 @@ public class AnnouncementConsumer {
               email)
               .map(HttpEntity::getBody).map(CollectionModel::getContent)
               .map(Collection::stream).map(content -> content.collect(toList()))
-              .orElse(Collections.emptyList());
+              .orElse(Collections.emptyList()));
     }
 
     private List<Announcement> sortByDepartureDate(List<Announcement> announcementList) {

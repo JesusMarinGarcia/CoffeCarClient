@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -65,12 +67,11 @@ public class AnnounceController {
         return "createAnnouncement";
     }
 
-    @GetMapping("/announcementDetails")
+    @PostMapping("/announcementDetails")
     public String announcementDetails(
-            @RequestParam(name="announcementURI") String URI,
+            @ModelAttribute Announcement announcement,
             Model model,
             OAuth2AuthenticationToken authenticationToken){
-        Announcement announcement = announcementConsumer.getAnnouncementByURI(URI);
         StopConsumer stopConsumer = new StopConsumer();
         List<BusStop> stops = stopConsumer
                 .getNearby((float)announcement.getDepartureLatitude(),(float)announcement.getGetDepartureLongitude());
