@@ -83,6 +83,9 @@
                                     <h5 class="card-title" th:text="${announcement.title}"></h5>
                                     <p style="text-align: center" class="card-text" th:text="${announcement.description}"></p>
                                     <div class="nav justify-content-center">
+                                        <p th:text="${announcement.selfURI}"></p>
+                                        <p th:text="${announcement.id}"></p>
+
                                         <form th:action="@{announcementDetails}">
                                             <input type="hidden" name="announcementURI" th:value="${announcement.selfURI}">
                                             <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
