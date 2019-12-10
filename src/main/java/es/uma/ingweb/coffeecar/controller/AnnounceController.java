@@ -7,12 +7,15 @@ import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
 import es.uma.ingweb.coffeecar.consumers.StopConsumer;
 import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.Announce;
+import es.uma.ingweb.coffeecar.entities.BusStop;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 
 @Controller
@@ -66,10 +69,10 @@ public class AnnounceController {
             @RequestParam(name="announcementURI") String URI,
             Model model,
             OAuth2AuthenticationToken authenticationToken){
-        Announcement announcement = announcementConsumer.getAnnouncementByURI(URI);
+        Announce announcement = announcementConsumer.getAnnouncementByURI(URI);
         StopConsumer stopConsumer = new StopConsumer();
         List<BusStop> stops = stopConsumer
-                .getNearby((float)announcement.getDepartureLatitude(),(float)announcement.getGetDepartureLongitude());
+                .getNearby((float)announcement.getDepartureLatitude(),(float)announcement.getDepartureLongitude());
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver = announcement.getDriver()
                 .equals(user);
@@ -82,7 +85,7 @@ public class AnnounceController {
     }
 // metodo al querer editar un anuncio
     @GetMapping("/editAnnouncement")
-    public String editAnnouncement(@RequestParam("announcementURI") String uri , @ModelAttribute Announcement announcement, Model model){
+    public String editAnnouncement(@RequestParam("announcementURI") String uri , @ModelAttribute Announce announcement, Model model){
         try{
             announcement = announcementConsumer.getAnnouncementByURI(uri);
             System.out.println(announcement.toString());
@@ -97,7 +100,7 @@ public class AnnounceController {
     }
 //metodo cuando se modifica el anuncio
     @PutMapping("/editAnnouncement/confirm")
-    public String changeAnnouncement(@ModelAttribute Announcement announcement, RedirectAttributes redirectAttrs){
+    public String changeAnnouncement(@ModelAttribute Announce announcement, RedirectAttributes redirectAttrs){
         if (announcement.getDescription() == null || announcement.getDescription().isEmpty()) {
             announcement.setDescription("No hay descripción");
         }

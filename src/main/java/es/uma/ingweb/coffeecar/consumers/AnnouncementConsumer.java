@@ -90,7 +90,7 @@ public class AnnouncementConsumer {
               HttpMethod.GET,
               null,
               getParameterizedTypeReference(),
-              email)
+              user)
               .map(HttpEntity::getBody).map(CollectionModel::getContent)
               .map(Collection::stream).map(content -> content.collect(toList()))
               .orElse(Collections.emptyList());
@@ -103,7 +103,7 @@ public class AnnouncementConsumer {
                     HttpMethod.GET,
                     null,
                     getParameterizedTypeReference(),
-                    email)
+                    user)
                     .map(HttpEntity::getBody).map(CollectionModel::getContent)
                     .map(Collection::stream).map(content -> content.collect(toList()))
                     .orElse(Collections.emptyList());
