@@ -25,8 +25,8 @@ public class StopConsumer {
 
     public StopConsumer(RestTemplate restTemplate) {
         this.restTemplate = new RestTemplate();
-        GET_ALL_STOP = SERVER_URL + "getStops/all";
-        GET_ALL_NEARBY_STOPS = SERVER_URL + "getStops/near?lat={lat}&lon={lon}";
+        GET_ALL_STOP = SERVER_URL + "stops";
+        GET_ALL_NEARBY_STOPS = SERVER_URL + "stops/search/findNearby?lat={lat}&lon={lon}";
     }
 
     public List<BusStop> getAll() {
@@ -39,7 +39,7 @@ public class StopConsumer {
 
     public List<BusStop> getNearby(double lat, double lon) {
         final BusStop[] stopResponse = restTemplate
-              .getForObject(SERVER_URL + "stops/near?lat={lat}&lon={lon}",
+              .getForObject(GET_ALL_NEARBY_STOPS,
                     BusStop[].class,
                     Map.of("lat", lat,
                           "lon", lon)

@@ -20,8 +20,8 @@ import java.util.Objects;
 public class BusConsumer {
     @Value("${server.url}")
     private String SERVER_URL;
-    private String CURRENT_POS_FROM_ALL_BUSES_URL = SERVER_URL + "getBuses/all";
-    private String CURRENT_POS_BY_LINE_URL = SERVER_URL + "getBuses/byLine?line=";
+    private String CURRENT_POS_FROM_ALL_BUSES_URL = SERVER_URL + "buses";
+    private String CURRENT_POS_BY_LINE_URL = SERVER_URL + "buses/search/findByLine?line=";
 
     private final RestTemplate restTemplate;
 
