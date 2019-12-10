@@ -107,15 +107,17 @@ public class AnnounceController {
         return "editAnnouncement";
     }
     //metodo cuando se modifica el anuncio
-    @GetMapping("/editarAnuncio/confirm")
+    @PutMapping("/editarAnuncio/confirm")
     public String changeAnnouncement(@ModelAttribute Announce announce,@RequestParam("UriAnnounce") String uri, Model model,
                                      OAuth2AuthenticationToken authenticationToken, RedirectAttributes redirectAttrs){
         if (announce.getDescription() == null || announce.getDescription().isEmpty()) {
             announce.setDescription("No hay descripción");
         }
+
         Announce announce1 = announcementConsumer.getAnnouncementByURI(uri);
         announce.add(announce1.getLinks());
         announcementConsumer.edit(announce);
+
 
 
     /*

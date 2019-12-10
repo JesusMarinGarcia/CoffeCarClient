@@ -9,6 +9,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.client.Traverson;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -114,7 +115,8 @@ public class AnnouncementConsumer {
 
     public void edit(Announce announce) {
 
-        restTemplate.put(announce.getLink("self").map(Link::getHref).get(), Announce.class);
+        restTemplate.put(announce.getLink("self").map(Link::getHref).get(), new HttpEntity(announce), Announce.class
+                , announce.getId());
 
     }
 
