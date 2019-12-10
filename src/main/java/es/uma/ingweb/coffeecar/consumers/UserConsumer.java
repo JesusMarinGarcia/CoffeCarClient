@@ -6,6 +6,7 @@ import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.client.Traverson;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class UserConsumer {
             User user = getByEmail(email);
             response = Optional.of(user);
         } catch (Exception ignored) {
-            System.out.printf("not found :(");
+            System.out.print("not found :(");
         }
 
         return response;
@@ -43,17 +44,22 @@ public class UserConsumer {
     public User getByEmail(String email) {
         Traverson.TraversalBuilder traversalBuilder = traverson.follow("users").follow("search").follow("findUserByEmail")
               .withTemplateParameters(Map.of("email", email));
+
         EntityModel<User> userEntityModel = traversalBuilder.toObject(getEntityModelParameterizedTypeReference());
-        User user = userEntityModel.getContent();
-        String ownedAnnouncesLink = userEntityModel.getLink("ownedAnnounces").get().getHref();
-        String joinedAnnouncesLink = userEntityModel.getLink("joinedAnnounces").get().getHref();
-        user.setOwnedAnnounces(getAnnounces(URI.create(ownedAnnouncesLink), "ownedAnnounces"));
+
+        User user = Objects.requireNonNull(userEntityModel).getContent();
+
+        String ownedAnnouncesLink = userEntityModel.getLink("ownedAnnounces").map(Link::getHref).get();
+        String joinedAnnouncesLink = userEntityModel.getLink("joinedAnnounces").map(Link::getHref).get();
+
+        Objects.requireNonNull(user).setOwnedAnnounces(getAnnounces(URI.create(ownedAnnouncesLink), "ownedAnnounces"));
         user.setJoinedAnnounces(getAnnounces(URI.create(joinedAnnouncesLink), "joinedAnnounces"));
         return user;
     }
 
     private List<Announce> getAnnounces(URI url, String relation) {
-        Collection<Announce> announces = new Traverson(url, HAL_JSON).follow("self").toObject(getAnnounceCollectionType()).getContent();
+        Collection<Announce> announces =
+                Objects.requireNonNull(new Traverson(url, HAL_JSON).follow("self").toObject(getAnnounceCollectionType())).getContent();
         return new ArrayList<>(announces);
     }
 
