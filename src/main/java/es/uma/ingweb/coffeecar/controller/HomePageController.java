@@ -25,16 +25,16 @@ public class HomePageController {
         String email = authenticationToken.getPrincipal().getAttribute("email");
         String name = authenticationToken.getPrincipal().getAttribute("name");
 
-        User user = createIfDoesntExist(email, name);
+        createIfDoesntExist(email, name);
 
-        model.addAttribute("announcementsAvailable", announcementConsumer.getAll());
+        model.addAttribute("announcementsAvailable", announcementConsumer.getAvailableAnnouncements(email));
         model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
 
         return "home";
     }
 
-    private User createIfDoesntExist(String email, String name) {
-        return userConsumer.optionalGetByEmail(email)
+    private void createIfDoesntExist(String email, String name) {
+        userConsumer.optionalGetByEmail(email)
               .filter(u -> Objects.nonNull(u.getEmail()))
               .orElseGet(() -> createUser(email, name));
     }

@@ -28,8 +28,6 @@ import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 @Service
 public class AnnouncementConsumer {
     private static final String URL = "http://localhost:8080/api/announces";
-    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver?user={user}";
-    private static final String GET_ANNOUNCEMENTS_BY_PASSENGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers?user={user}";
 
     private final RestTemplate restTemplate;
     private final Traverson traverson;
@@ -48,7 +46,11 @@ public class AnnouncementConsumer {
                     null,
                       getAnnounceEntityModelParameterizedTypeReference()
               );
-        return setParams(Objects.requireNonNull(Objects.requireNonNull(announcementResponseEntity.getBody()).getContent()));
+
+        Announce announce = Objects.requireNonNull(announcementResponseEntity.getBody()).getContent();
+        Objects.requireNonNull(announce).add(announcementResponseEntity.getBody().getLinks());
+
+        return setParams(announce);
     }
 
     public List<Announce> getAvailableAnnouncements(String email) {
@@ -70,14 +72,14 @@ public class AnnouncementConsumer {
                 .follow("findUserTrips")
                 .withTemplateParameters(Map.of("email", email));
 
-        PagedModel<Announce> announces = traversalBuilder.toObject(getParameterizedTypeReference());
+        CollectionModel<Announce> announces = traversalBuilder.toObject(getParameterizedTypeReference());
 
         return setParams(new ArrayList<>(Objects.requireNonNull(announces).getContent()));
     }
 
     private Announce setParams(Announce announcement){
         String driver = announcement.getLink("driver").map(Link::getHref).get();
-        String passengers = announcement.getLink("passenger").map(Link::getHref).get();
+        String passengers = announcement.getLink("passengers").map(Link::getHref).get();
 
         Objects.requireNonNull(announcement).setDriver(getDriver(URI.create(driver)));
         announcement.setPassengers(getPassengers(URI.create(passengers)));
@@ -94,19 +96,18 @@ public class AnnouncementConsumer {
 
     public User getDriver(URI uri){
         return Objects.requireNonNull(new Traverson(uri, HAL_JSON)
-                .follow("driver")
+                .follow("self")
                 .toObject(getUserEntityModelParameterizedTypeReference())).getContent();
     }
 
     public List<User> getPassengers(URI uri){
         return new ArrayList<>(Objects.requireNonNull(new Traverson(uri, HAL_JSON)
-                .follow("passengers")
+                .follow("self")
                 .toObject(getUserCollectionType())).getContent());
     }
 
-    public String create(JsonNode announcement) {
-        URI uri = restTemplate.postForLocation(URL, announcement);
-        return Objects.requireNonNull(uri).getPath();
+    public void create(JsonNode announcement) {
+        restTemplate.postForLocation(URL, announcement);
     }
 
     public void delete(Announce announce) {

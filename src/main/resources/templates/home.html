@@ -84,11 +84,9 @@
                                     <h5 class="card-title" th:text="${announce.title}"></h5>
                                     <p style="text-align: center" class="card-text"
                                        th:text="${announce.description}"></p>
-                                    <div class="nav justify-content-center">
-                                        <p th:text="${announcement.getLink('self')}"></p>
-                                        <p th:text="${announcement.driver.name}"></p>
-                                        <form th:action="@{announcementDetails}">
-                                            <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self')}">
+                                    <div class="nav justify-content-center">>
+                                        <form th:action="@{details}">
+                                            <input type="hidden" name="announcementURI" th:value="${announce.getLink('self').get().getHref()}">
                                             <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
                                         </form>
                                     </div>
@@ -113,10 +111,8 @@
                                            th:text="${announce.description}"></p>
                                         <div class="nav justify-content-center">
                                             <form>
-                                                <p th:text="${announcement.getLink('self')}"></p>
-                                                <p th:text="${announcement.driver.name}"></p>
-                                                <form th:action="@{announcementDetails}">
-                                                <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self')}">
+                                                <form th:action="@{details}">
+                                                <input type="hidden" name="announcementURI" th:value="${announce.getLink('self').get().getHref()}">
                                                 <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
                                             </form>
                                             </form>

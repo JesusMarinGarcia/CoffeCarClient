@@ -1,6 +1,7 @@
 package es.uma.ingweb.coffeecar.entities;
 
 import lombok.*;
+import org.springframework.hateoas.EntityModel;
 
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User extends EntityModel<User> {
     private long id;
     private String name;
     private String email;

@@ -9,6 +9,7 @@ import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.BusStop;
 import es.uma.ingweb.coffeecar.entities.User;
+import org.springframework.hateoas.Link;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,7 +35,7 @@ public class AnnounceController {
 
     @PostMapping("createAnnouncement/confirm")
     public String announce(
-            @ModelAttribute Announcement announcement,
+            @ModelAttribute Announce announce,
             OAuth2AuthenticationToken authenticationToken,
             RedirectAttributes redirectAttrs
             ){
@@ -43,11 +43,12 @@ public class AnnounceController {
         if (announce.getDescription() == null || announce.getDescription().isEmpty()) {
             announce.setDescription("No hay descripción");
         }
+
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announce);
-        jsonNodeAnnouncement.put("driver", driver.getSelfURI());
+        jsonNodeAnnouncement.put("driver", driver.getLink("self").map(Link::getHref).get());
 
-        announce.setSelfURI(announcementConsumer.create(jsonNodeAnnouncement));
+        announcementConsumer.create(jsonNodeAnnouncement);
 
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
@@ -60,15 +61,15 @@ public class AnnounceController {
         return "createAnnouncement";
     }
 
-    @GetMapping("/announcementDetails")
+    @GetMapping("/details")
     public String announcementDetails(
-            @RequestParam(name="announcementURI") String URI,
+            @RequestParam(name="announcementURI") String uri,
             Model model,
             OAuth2AuthenticationToken authenticationToken){
-        Announcement announcement = announcementConsumer.getAnnouncementByURI(URI);
+        Announce announcement = announcementConsumer.getAnnouncementByURI(uri);
         StopConsumer stopConsumer = new StopConsumer();
         List<BusStop> stops = stopConsumer
-                .getNearby((float)announcement.getDepartureLatitude(),(float)announcement.getGetDepartureLongitude());
+                .getNearby((float)announcement.getDepartureLatitude(),(float)announcement.getDepartureLongitude());
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver = announcement.getDriver()
                 .equals(user);
@@ -82,7 +83,7 @@ public class AnnounceController {
 
     @GetMapping("/announcementDelete")
     public String announcementDelete(
-            @ModelAttribute Announcement announcement,
+            @ModelAttribute Announce announcement,
             OAuth2AuthenticationToken authenticationToken,
             RedirectAttributes redirectAttrs){
         User driver =  userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
@@ -90,11 +91,10 @@ public class AnnounceController {
             announcementConsumer.delete(announcement);
             redirectAttrs
                     .addFlashAttribute("mensaje", "Eliminado correctamente");
-            return "redirect:/";
         }else{
             redirectAttrs
                     .addFlashAttribute("mensaje", "No tienes permiso para esta acción");
-            return "redirect:/";
         }
+        return "redirect:/";
     }
 }

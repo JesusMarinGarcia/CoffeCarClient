@@ -54,6 +54,8 @@ public class UserConsumer {
 
         Objects.requireNonNull(user).setOwnedAnnounces(getAnnounces(URI.create(ownedAnnouncesLink), "ownedAnnounces"));
         user.setJoinedAnnounces(getAnnounces(URI.create(joinedAnnouncesLink), "joinedAnnounces"));
+
+        user.add(userEntityModel.getLinks());
         return user;
     }
 
