@@ -69,7 +69,7 @@
         <input type="submit" value="Abandonar viaje" class="btn btn-dark btn-lg btn-block">
     </form>
 </div>
-<div th:if="${isPassenger} == false && ${announcement.getSeats()} > ${announcement.getPassengers().size()}" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
+<div th:if="${canJoin} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
     <form  method="post" th:action="@{details/join}" th:object="${announcement}" style="margin-right: 1%; width: 45%">
         <input type="submit" value="Unirse al viaje" class="btn btn-primary btn-lg btn-block">
     </form>

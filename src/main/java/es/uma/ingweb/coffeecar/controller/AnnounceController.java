@@ -71,9 +71,11 @@ public class AnnounceController {
         boolean isDriver = announcement.getDriver()
                 .equals(user);
         boolean isPassenger = announcement.getPassengers().contains(user);
+        boolean canJoin = isPassenger && (announcement.getSeats() > announcement.getPassengers().size());
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
         model.addAttribute("announcement", announcement);
+        model.addAttribute("canJoin",canJoin);
         model.addAttribute("paradas", stops);
         return "announcementDetails";
     }
