@@ -5,29 +5,27 @@ import com.sun.nio.sctp.AbstractNotificationHandler;
 import es.uma.ingweb.coffeecar.RestTemplateProxy;
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.client.Traverson;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
 @Service
 public class AnnouncementConsumer {
-    private static final String URL = "http://localhost:8080/api/announces";
+    @Value("${server.url}")
+    private String SERVER_URL;
 
     private final RestTemplate restTemplate;
     private final Traverson traverson;
@@ -107,15 +105,15 @@ public class AnnouncementConsumer {
     }
 
     public void create(JsonNode announcement) {
-        restTemplate.postForLocation(URL, announcement);
+        restTemplate.postForLocation(SERVER_URL + "announces", announcement);
     }
 
     public void delete(Announce announce) {
-        restTemplate.delete(announce.getSelfURI());
+        restTemplate.delete(announce.getLink("self").map(Link::getHref).get());
     }
 
     public void edit(Announce announce) {
-        restTemplate.put(URL, announce, Announce.class);
+        restTemplate.put(SERVER_URL + "announces", announce, Announce.class);
     }
 
     private static ParameterizedTypeReference<PagedModel<Announce>> getParameterizedTypeReference() {
