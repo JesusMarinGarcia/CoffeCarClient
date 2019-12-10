@@ -27,7 +27,7 @@ public class HomePageController {
 
         User user = createIfDoesntExist(email, name);
 
-        model.addAttribute("announcementsAvailable", announcementConsumer.getAvailableAnnouncements(email));
+        model.addAttribute("announcementsAvailable", announcementConsumer.getAll());
         model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
 
         return "home";

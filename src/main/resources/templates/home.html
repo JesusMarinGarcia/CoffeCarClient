@@ -85,10 +85,11 @@
                                     <p style="text-align: center" class="card-text"
                                        th:text="${announce.description}"></p>
                                     <div class="nav justify-content-center">
-                                        <form th:action="@{announcementDetails(announcementURI=${announce.selfURI})}">
-                                            <button type="submit" style="margin-left: 5%" class="btn btn-light">Más
-                                                detalles
-                                            </button>
+                                        <p th:text="${announcement.getLink('self')}"></p>
+                                        <p th:text="${announcement.driver.name}"></p>
+                                        <form th:action="@{announcementDetails}">
+                                            <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self')}">
+                                            <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
                                         </form>
                                     </div>
                                 </div>
@@ -111,11 +112,13 @@
                                         <p style="text-align: center" class="card-text"
                                            th:text="${announce.description}"></p>
                                         <div class="nav justify-content-center">
-                                            <form
-                                                th:action="@{announcementDetails(announcementURI=${announce.selfURI})}">
-                                                <button type="submit" style="margin-left: 5%" class="btn btn-light">Más
-                                                    detalles
-                                                </button>
+                                            <form>
+                                                <p th:text="${announcement.getLink('self')}"></p>
+                                                <p th:text="${announcement.driver.name}"></p>
+                                                <form th:action="@{announcementDetails}">
+                                                <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self')}">
+                                                <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
+                                            </form>
                                             </form>
                                         </div>
                                     </div>
