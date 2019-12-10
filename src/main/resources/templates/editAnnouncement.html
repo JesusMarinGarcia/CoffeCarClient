@@ -114,7 +114,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Título</span>
             </div>
-            <input th:field="*{title}"  required="true" type="text" class="form-control" aria-label="With textarea" id="title"/>
+            <input th:text="*{title}" th:field="*{title}" required="true" type="text" class="form-control" aria-label="With textarea" id="title"/>
         </div>
     </div>
 
@@ -124,7 +124,7 @@
                 <span class="input-group-text">Asientos:</span>
                 <span style="min-width: 42px" class="input-group-text" id="nasientos"></span>
             </div>
-            <input th:field="*{seats}" style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
+            <input th:field="*{seats}"  style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
 
         </div>
     </div>

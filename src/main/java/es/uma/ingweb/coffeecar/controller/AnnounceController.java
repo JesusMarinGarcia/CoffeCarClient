@@ -15,7 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -86,8 +85,17 @@ public class AnnounceController {
     }
 // metodo al querer editar un anuncio
     @GetMapping("/editAnnouncement")
-    public String editAnnouncement(@ModelAttribute Announcement announcement, Model model){
-        model.addAttribute("announcement", announcement);
+    public String editAnnouncement(@RequestParam("announcementURI") String uri , @ModelAttribute Announcement announcement, Model model){
+        try{
+            announcement = announcementConsumer.getAnnouncementByURI(uri);
+            System.out.println(announcement.toString());
+            model.addAttribute("announcement", announcement);
+        }catch (IllegalArgumentException e){
+            System.out.println(e.getCause());
+        }
+
+
+
         return "editAnnouncement";
     }
 //metodo cuando se modifica el anuncio

@@ -86,8 +86,8 @@
                                         <p th:text="${announcement.selfURI}"></p>
                                         <p th:text="${announcement.id}"></p>
 
-                                        <form th:action="@{announcementDetails}">
-                                            <input type="hidden" name="announcementURI" th:value="${announcement.selfURI}">
+                                        <form th:action="@{editAnnouncement}" th:object="${announcement}">
+                                            <input type="hidden" name="announcementURI" th:value="${announcement}">
                                             <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
                                         </form>
                                     </div>
