@@ -3,13 +3,14 @@ package es.uma.ingweb.coffeecar.entities;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.hateoas.EntityModel;
 
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Announce {
+public class Announce extends EntityModel<Announce> {
     private long id;
     private String title;
     private String departureTime;

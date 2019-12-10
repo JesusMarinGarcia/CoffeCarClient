@@ -80,10 +80,6 @@ public class UserConsumer {
         restTemplate.delete(URL, user, User.class);
     }
 
-    private static ParameterizedTypeReference<PagedModel<User>> getParameterizedTypeReference() {
-        return new ParameterizedTypeReference<>() {
-        };
-    }
 
     private static ParameterizedTypeReference<EntityModel<User>> getEntityModelParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {

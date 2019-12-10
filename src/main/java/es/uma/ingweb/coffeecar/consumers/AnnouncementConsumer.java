@@ -1,6 +1,7 @@
 package es.uma.ingweb.coffeecar.consumers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sun.nio.sctp.AbstractNotificationHandler;
 import es.uma.ingweb.coffeecar.RestTemplateProxy;
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
@@ -9,6 +10,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.client.Traverson;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -18,23 +20,24 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
 @Service
 public class AnnouncementConsumer {
-    private static final String URL = "http://localhost:8080/announced";
+    private static final String URL = "http://localhost:8080/api/announces";
     private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver?user={user}";
     private static final String GET_ANNOUNCEMENTS_BY_PASSENGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers?user={user}";
-    private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate?arrivalDate={arrivalDate}";
-    private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival?arrival={arrival}";
 
     private final RestTemplate restTemplate;
-    private final RestTemplateProxy restTemplateProxy;
+    private final Traverson traverson;
 
-    public AnnouncementConsumer(RestTemplate restTemplate, RestTemplateProxy restTemplateProxy) {
+
+    public AnnouncementConsumer(RestTemplate restTemplate, Traverson traverson) {
         this.restTemplate = restTemplate;
-        this.restTemplateProxy = restTemplateProxy;
+        this.traverson = traverson;
     }
 
     public Announce getAnnouncementByURI(String uri) {
@@ -43,111 +46,62 @@ public class AnnouncementConsumer {
                     uri,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<EntityModel<Announce>>() {
-                    }
+                      getAnnounceEntityModelParameterizedTypeReference()
               );
-        return setURIs(announcementResponseEntity.getBody());
-    }
-
-    private Announce setURIs(EntityModel<Announce> resourceAnnouncement) {
-        Announce announce = Objects.requireNonNull(resourceAnnouncement).getContent();
-        Optional<Link> driver = Objects.requireNonNull(resourceAnnouncement).getLink("driver");
-        Optional<Link> passengers = Objects.requireNonNull(resourceAnnouncement).getLink("passengers");
-
-        Objects.requireNonNull(announce).setDriverURI(driver.map(Link::getHref).get());
-        Objects.requireNonNull(announce).setPassengersURI(passengers.map(Link::getHref).get());
-
-        return announce;
-    }
-
-    public List<Announce> getAll() {
-        final ResponseEntity<PagedModel<Announce>> announcementResponse =
-              restTemplate.exchange(
-                    URL,
-                    HttpMethod.GET,
-                    null,
-                    getParameterizedTypeReference()
-              );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+        return setParams(Objects.requireNonNull(Objects.requireNonNull(announcementResponseEntity.getBody()).getContent()));
     }
 
     public List<Announce> getAvailableAnnouncements(String email) {
-        return restTemplateProxy.exchange(
-              URL + "/search/findAvailableAnnounces?email={email}",
-              HttpMethod.GET,
-              null,
-              getParameterizedTypeReference(),
-              email
-        )
-              .map(HttpEntity::getBody).map(CollectionModel::getContent)
-              .map(Collection::stream).map(content -> content.collect(toList()))
-              .orElseGet(Collections::emptyList);
-    }
+        Traverson.TraversalBuilder traversalBuilder = traverson
+                .follow("announces")
+                .follow("search")
+                .follow("findAvailableAnnounces")
+                .withTemplateParameters(Map.of("email", email));
 
-    public List<Announce> getByDriver(User user) {
-        return restTemplateProxy.exchange(
-              GET_ANNOUNCEMENTS_BY_DRIVER_URL,
-              HttpMethod.GET,
-              null,
-              getParameterizedTypeReference(),
-              user)
-              .map(HttpEntity::getBody).map(CollectionModel::getContent)
-              .map(Collection::stream).map(content -> content.collect(toList()))
-              .orElse(Collections.emptyList());
-    }
+        PagedModel<Announce> announces = traversalBuilder.toObject(getParameterizedTypeReference());
 
-    public List<Announce> getByPassenger(User user) {
-        return
-              restTemplateProxy.exchange(
-                    GET_ANNOUNCEMENTS_BY_PASSENGER_URL,
-                    HttpMethod.GET,
-                    null,
-                    getParameterizedTypeReference(),
-                    user)
-                    .map(HttpEntity::getBody).map(CollectionModel::getContent)
-                    .map(Collection::stream).map(content -> content.collect(toList()))
-                    .orElse(Collections.emptyList());
+        return setParams(new ArrayList<>(Objects.requireNonNull(announces).getContent()));
     }
 
     public List<Announce> getMyTrips(String email) {
-        return restTemplateProxy.exchange(
-              URL + "/findUserTrips?email=email",
-              HttpMethod.GET,
-              null,
-              getParameterizedTypeReference(),
-              email)
-              .map(HttpEntity::getBody).map(CollectionModel::getContent)
-              .map(Collection::stream).map(content -> content.collect(toList()))
-              .orElse(Collections.emptyList());
+        Traverson.TraversalBuilder traversalBuilder = traverson
+                .follow("announces")
+                .follow("search")
+                .follow("findUserTrips")
+                .withTemplateParameters(Map.of("email", email));
+
+        PagedModel<Announce> announces = traversalBuilder.toObject(getParameterizedTypeReference());
+
+        return setParams(new ArrayList<>(Objects.requireNonNull(announces).getContent()));
     }
 
-    private List<Announce> sortByDepartureDate(List<Announce> announceList) {
-        announceList.sort(Comparator.comparing(Announce::getDepartureTime));
-        return announceList;
+    private Announce setParams(Announce announcement){
+        String driver = announcement.getLink("driver").map(Link::getHref).get();
+        String passengers = announcement.getLink("passenger").map(Link::getHref).get();
+
+        Objects.requireNonNull(announcement).setDriver(getDriver(URI.create(driver)));
+        announcement.setPassengers(getPassengers(URI.create(passengers)));
+
+        return announcement;
     }
 
-    public List<Announce> getByArrivalDate(LocalDateTime arrivalDate) {
-        final ResponseEntity<PagedModel<Announce>> announcementResponse =
-              restTemplate.exchange(
-                    GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL,
-                    HttpMethod.GET,
-                    null,
-                    getParameterizedTypeReference(),
-                    arrivalDate
-              );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+    private List<Announce> setParams(List<Announce> announcements){
+        List<Announce> result = new ArrayList<>();
+        announcements.forEach(announce -> result.add(setParams(announce)));
+
+        return result;
     }
 
-    public List<Announce> getByArrival(String arrival) {
-        final ResponseEntity<PagedModel<Announce>> announcementResponse =
-              restTemplate.exchange(
-                    GET_ANNOUNCEMENTS_BY_ARRIVAL_URL,
-                    HttpMethod.GET,
-                    null,
-                    getParameterizedTypeReference(),
-                    arrival
-              );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+    public User getDriver(URI uri){
+        return Objects.requireNonNull(new Traverson(uri, HAL_JSON)
+                .follow("driver")
+                .toObject(getUserEntityModelParameterizedTypeReference())).getContent();
+    }
+
+    public List<User> getPassengers(URI uri){
+        return new ArrayList<>(Objects.requireNonNull(new Traverson(uri, HAL_JSON)
+                .follow("passengers")
+                .toObject(getUserCollectionType())).getContent());
     }
 
     public String create(JsonNode announcement) {
@@ -165,6 +119,21 @@ public class AnnouncementConsumer {
 
     private static ParameterizedTypeReference<PagedModel<Announce>> getParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {
+        };
+    }
+
+    private static ParameterizedTypeReference<EntityModel<Announce>> getAnnounceEntityModelParameterizedTypeReference() {
+        return new ParameterizedTypeReference<>() {
+        };
+    }
+
+    private static ParameterizedTypeReference<EntityModel<User>> getUserEntityModelParameterizedTypeReference() {
+        return new ParameterizedTypeReference<>() {
+        };
+    }
+
+    private ParameterizedTypeReference<CollectionModel<User>> getUserCollectionType() {
+        return new ParameterizedTypeReference<CollectionModel<User>>() {
         };
     }
 }
