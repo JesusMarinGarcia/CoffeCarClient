@@ -1,13 +1,12 @@
 package es.uma.ingweb.coffeecar.consumers;
 
-import es.uma.ingweb.coffeecar.RestTemplateProxy;
+
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.client.Traverson;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -24,7 +23,7 @@ public class UserConsumer {
     private final RestTemplate restTemplate;
     private final Traverson traverson;
 
-    public UserConsumer(RestTemplate restTemplate, RestTemplateProxy restTemplateProxy, Traverson traverson) {
+    public UserConsumer(RestTemplate restTemplate, Traverson traverson) {
         this.restTemplate = restTemplate;
         this.traverson = traverson;
     }
