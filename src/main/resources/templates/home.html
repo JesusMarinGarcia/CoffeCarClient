@@ -110,12 +110,12 @@
                                         <p style="text-align: center" class="card-text"
                                            th:text="${announce.description}"></p>
                                         <div class="nav justify-content-center">
-                                            <form>
-                                                <form th:action="@{details}">
+
+                                                <form th:action="@{editarAnuncio}">
                                                 <input type="hidden" name="announcementURI" th:value="${announce.getLink('self').get().getHref()}">
                                                 <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
-                                            </form>
-                                            </form>
+                                                </form>
+
                                         </div>
                                     </div>
                                 </div>

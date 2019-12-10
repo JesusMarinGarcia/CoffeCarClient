@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+
+
+
+    <script>
+        $("document").ready(function() {
+
+            $('input[type=file]').on("change", function() {
+
+                document.getElementById("labelFile").innerHTML = "Imagen cargada";
+                var $files = $(this).get(0).files;
+
+                if ($files.length) {
+
+                    // Reject big files
+                    if ($files[0].size > $(this).data("max-size") * 1024) {
+                        console.log("Please select a smaller file");
+                        return false;
+                    }
+
+                    // Begin file upload
+                    console.log("Uploading file to Imgur..");
+
+                    // Replace ctrlq with your own API key
+                    var apiUrl = 'https://api.imgur.com/3/image';
+                    var apiKey = 'c4853e7aac75f3d';
+
+                    var settings = {
+                        async: false,
+                        crossDomain: true,
+                        processData: false,
+                        contentType: false,
+                        type: 'POST',
+                        url: apiUrl,
+                        headers: {
+                            Authorization: 'Client-ID ' + apiKey,
+                            Accept: 'application/json'
+                        },
+                        mimeType: 'multipart/form-data'
+                    };
+
+                    var formData = new FormData();
+                    formData.append("image", $files[0]);
+                    settings.data = formData;
+
+                    // Response contains stringified JSON
+                    // Image URL available at response.data.link
+                    $.ajax(settings).done(function(response) {
+                        console.log(response);
+                        document.getElementById('link').value = JSON.parse(response).data.link;
+                    });
+
+                }
+            });
+        });
+    </script>
+
+    <title>Anuncio</title>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <img th:src="@{CoffeeCarLogo.png}" src="../static/CoffeeCarLogo.png" class="img-fluid" alt="Responsive image" style="width: 60px">
+    <a class="navbar-brand" href="#">CoffeCar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Perfil <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Cerrar sesión</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<br>
+<form id="imgur">
+
+    <div class="nav justify-content-center" style="padding-top: 1%">
+        <div class="custom-file" style="max-width: 20%; min-width: 200px">
+            <input type="file" class="custom-file-input imgur" id="foto" accept="image/png, .jpeg, .jpg" name="foto" data-max-size="5000" />
+            <label class="custom-file-label" id="labelFile" for="foto">Elige una foto</label>
+        </div>
+
+    </div>
+</form>
+<form th:action="@{editarAnuncio/confirm}" th:object="${announce}">
+
+    <input type="hidden" id="link" value="" th:field="*{imgLink}"/>
+    <input type="hidden" name="UriAnnounce" th:value="${uri}"/>
+    <div class="nav justify-content-center" style="padding-top: 2%">
+        <div class="input-group" style="max-width: 20%">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Título</span>
+            </div>
+            <input th:field="*{title}"  required="true" type="text" class="form-control" aria-label="With textarea" id="title"/>
+        </div>
+    </div>
+
+    <div class="nav justify-content-center" style="padding-top: 2%">
+        <div class="input-group" style="max-width: 20%">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Asientos:</span>
+                <span style="min-width: 42px" class="input-group-text" id="nasientos"></span>
+            </div>
+            <input th:field="*{seats}" style="width: 53%" type="range" min="1" max="14" value="1" class="slider" id="asientos" name="asientos">
+
+        </div>
+    </div>
+    <div class="nav justify-content-center" style="padding-top: 2%">
+        <div class="input-group input-group mb-3" style="width: 350px">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Fecha salida</span>
+            </div>
+            <input th:field="*{departureTime}" required="true" id="dt" type="datetime-local" name="fechaSalida" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+        </div>
+        <div class="input-group input-group mb-3" style="width: 350px; margin-left: 20px">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Fecha llegada</span>
+            </div>
+            <input th:field="*{arrivalDate}" required="true" id="at" type="datetime-local" name="fechaLlegada" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-sm">
+        </div>
+    </div>
+    <div class="nav justify-content-center">
+        <label id="lbl" style="color: green; font-size: small">Formato de fecha: yyyy-MM-dd HH:mm</label>
+    </div>
+
+    <div class="nav justify-content-center" style="padding-top: 1%">
+        <div class="input-group" style="max-width: 50%">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Breve descripción</span>
+            </div>
+            <textarea th:field="*{description}" class="form-control" aria-label="With textarea" id="descripcion"></textarea>
+        </div>
+    </div>
+
+
+    <br>
+    <input th:field="*{departureLatitude}" type="hidden" id="latOrigen" name="latOrigen" value=""/>
+    <input th:field="*{departureLongitude}" type="hidden" id="longOrigen" name="longOrigen" value=""/>
+    <input th:field="*{arrivalLatitude}" type="hidden" id="latDestino" name="latDestino" value=""/>
+    <input th:field="*{arrivalLongitude}" type="hidden" id="longDestino" name="longDestino" value=""/>
+    <input th:field="*{arrival}" type="hidden" id="arrival" name="arrival" value=""/>
+
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.css' type='text/css' />
+    <!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
+    <div class="row container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%">
+        <h5 for="map" style='width: 45%'>Seleccionar origen</h5>
+        <h5 for="mapDes" style='width: 45%; margin-left: 20px'>Seleccionar destino</h5>
+    </div>
+
+    <div class="row container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%">
+        <div id='map' style='width: 45%; height: 300px; border: 4px solid lightsteelblue'></div>
+        <div id="mapDes" style="width: 45%; height: 300px; margin-left: 20px; border: 4px solid indianred"></div>
+    </div>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [-4.42034, 36.72016],
+            zoom: 11
+        });
+
+        map.addControl(new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        }));
+
+        map.addControl(new mapboxgl.NavigationControl());
+
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }));
+
+        var str, strLatOri, strLongOri;
+
+        var marker = new mapboxgl.Marker({
+            draggable: true
+        })
+            .setLngLat([-4.42034, 36.72016])
+            .addTo(map);
+        var lngLat = marker.getLngLat();
+        str = JSON.stringify(lngLat);
+        coordArray = str.split(",");
+        strLongOri = coordArray[0].slice(7);
+        strLatOri = coordArray[1].slice(6,-1);
+        document.getElementById('latOrigen').value = strLatOri;
+        document.getElementById('longOrigen').value= strLongOri;
+
+
+        map.on('click', function(e) {
+            str = JSON.stringify(e.lngLat);
+            coordArray = str.split(",");
+            strLongOri = coordArray[0].slice(7);
+            strLatOri = coordArray[1].slice(6,-1);
+            document.getElementById('latOrigen').value = strLatOri;
+            document.getElementById('longOrigen').value= strLongOri;
+            marker
+                .setLngLat(e.lngLat)
+                .addTo(map);
+        });
+
+        function onDragEnd() {
+            var lngLat = marker.getLngLat();
+            str = JSON.stringify(lngLat);
+            coordArray = str.split(",");
+            strLongOri = coordArray[0].slice(7);
+            strLatOri = coordArray[1].slice(6,-1);
+            document.getElementById('latOrigen').value = strLatOri;
+            document.getElementById('longOrigen').value= strLongOri;
+        }
+
+        marker.on('dragend', onDragEnd);
+
+    </script>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
+        var mapDes = new mapboxgl.Map({
+            container: 'mapDes',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [-4.42034, 36.72016],
+            zoom: 11
+        });
+
+        mapDes.addControl(new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        }));
+
+        mapDes.addControl(new mapboxgl.NavigationControl());
+
+        mapDes.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }));
+
+        var xhReq = new XMLHttpRequest();
+
+        var strDes, strLatDes, strLongDes;
+
+        var markerDes = new mapboxgl.Marker({
+            draggable: true
+        })
+            .setLngLat([-4.42034, 36.72016])
+            .addTo(mapDes);
+
+        var lngLatDes = markerDes.getLngLat();
+        strDes = JSON.stringify(lngLatDes);
+        coordArrayDes = strDes.split(",");
+        strLongDes = coordArrayDes[0].slice(7);
+        strLatDes = coordArrayDes[1].slice(6,-1);
+        document.getElementById('latDestino').value = strLatDes;
+        document.getElementById('longDestino').value= strLongDes;
+        safeAddress(strLatDes,strLongDes);
+
+        mapDes.on('click', function(e) {
+            strDes = JSON.stringify(e.lngLat);
+            coordArrayDes = strDes.split(",");
+            strLongDes = coordArrayDes[0].slice(7);
+            strLatDes = coordArrayDes[1].slice(6,-1);
+            document.getElementById('latDestino').value = strLatDes;
+            document.getElementById('longDestino').value= strLongDes;
+            markerDes
+                .setLngLat(e.lngLat)
+                .addTo(mapDes);
+
+            safeAddress(strLatDes,strLongDes);
+        });
+
+        function safeAddress(lat,lng) {
+            xhReq.open("GET","https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lng + "&zoom=8&addressdetails=1",false)
+            xhReq.send(null);
+            var jsonObject = JSON.parse(xhReq.responseText);
+            document.getElementById('arrival').value= jsonObject.display_name;
+        }
+
+        function onDragEndDes() {
+            var lngLatDes = markerDes.getLngLat();
+            strDes = JSON.stringify(lngLatDes);
+            coordArrayDes = strDes.split(",");
+            strLongDes = coordArrayDes[0].slice(7);
+            strLatDes = coordArrayDes[1].slice(6,-1);
+            document.getElementById('latDestino').value = strLatDes;
+            document.getElementById('longDestino').value= strLongDes;
+            safeAddress(strLatDes,strLongDes);
+        }
+
+        markerDes.on('dragend', onDragEndDes);
+
+    </script>
+
+    <br>
+    <br>
+    <div class="row container-fluid justify-content-center" style="padding-left: 9%; padding-right: 9%">
+        <input type="submit" class="btn btn-primary btn-lg btn-block" value="¡Modificar Anuncio!"></input>
+    </div>
+    <br>
+    <br>
+</form>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
+<script>
+    var slider = document.getElementById("asientos");
+    var output = document.getElementById("nasientos");
+    output.innerHTML = slider.value; // Display the default slider value
+
+    // Update the current slider value (each time you drag the slider handle)
+    slider.oninput = function() {
+        output.innerHTML = this.value;
+    }
+</script>
+
+
+</body>
+</html>
