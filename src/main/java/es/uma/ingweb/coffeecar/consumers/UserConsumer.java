@@ -52,7 +52,7 @@ public class UserConsumer {
         String ownedAnnouncesLink = userEntityModel.getLink("ownedAnnounces").map(Link::getHref).get();
         String joinedAnnouncesLink = userEntityModel.getLink("joinedAnnounces").map(Link::getHref).get();
 
-        Objects.requireNonNull(user).setOwnedAnnounces(getAnnounces(URI.create(ownedAnnouncesLink), "ownedAnnounces"));
+        user.setOwnedAnnounces(getAnnounces(URI.create(ownedAnnouncesLink), "ownedAnnounces"));
         user.setJoinedAnnounces(getAnnounces(URI.create(joinedAnnouncesLink), "joinedAnnounces"));
 
         user.add(userEntityModel.getLinks());
@@ -66,7 +66,7 @@ public class UserConsumer {
     }
 
     private ParameterizedTypeReference<CollectionModel<Announce>> getAnnounceCollectionType() {
-        return new ParameterizedTypeReference<CollectionModel<Announce>>() {
+        return new ParameterizedTypeReference<>() {
         };
     }
 

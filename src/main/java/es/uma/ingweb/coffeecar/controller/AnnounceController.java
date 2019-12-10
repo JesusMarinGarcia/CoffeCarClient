@@ -27,18 +27,20 @@ public class AnnounceController {
 
     private final AnnouncementConsumer announcementConsumer;
     private final UserConsumer userConsumer;
+    private final StopConsumer stopConsumer;
 
-    public AnnounceController(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer) {
+    public AnnounceController(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer, StopConsumer stopConsumer) {
         this.announcementConsumer = announcementConsumer;
         this.userConsumer = userConsumer;
+        this.stopConsumer = stopConsumer;
     }
 
     @PostMapping("createAnnouncement/confirm")
     public String announce(
-            @ModelAttribute Announce announce,
-            OAuth2AuthenticationToken authenticationToken,
-            RedirectAttributes redirectAttrs
-            ){
+          @ModelAttribute Announce announce,
+          OAuth2AuthenticationToken authenticationToken,
+          RedirectAttributes redirectAttrs
+    ) {
         User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if (announce.getDescription() == null || announce.getDescription().isEmpty()) {
             announce.setDescription("No hay descripción");
@@ -51,28 +53,27 @@ public class AnnounceController {
         announcementConsumer.create(jsonNodeAnnouncement);
 
         redirectAttrs
-                .addFlashAttribute("mensaje", "Agregado correctamente");
+              .addFlashAttribute("mensaje", "Agregado correctamente");
         return "redirect:/";
     }
 
     @GetMapping("/createAnnouncement")
-    public String createAnnouncement(Model model){
+    public String createAnnouncement(Model model) {
         model.addAttribute("anuncio", new Announce());
         return "createAnnouncement";
     }
 
     @GetMapping("/details")
     public String announcementDetails(
-            @RequestParam(name="announcementURI") String uri,
-            Model model,
-            OAuth2AuthenticationToken authenticationToken){
+          @RequestParam(name = "announcementURI") String uri,
+          Model model,
+          OAuth2AuthenticationToken authenticationToken) {
         Announce announcement = announcementConsumer.getAnnouncementByURI(uri);
-        StopConsumer stopConsumer = new StopConsumer();
         List<BusStop> stops = stopConsumer
-                .getNearby((float)announcement.getDepartureLatitude(),(float)announcement.getDepartureLongitude());
+              .getNearby(announcement.getDepartureLatitude(), announcement.getDepartureLongitude());
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver = announcement.getDriver()
-                .equals(user);
+              .equals(user);
         boolean isPassenger = announcement.getPassengers().contains(user);
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
@@ -83,17 +84,17 @@ public class AnnounceController {
 
     @GetMapping("/announcementDelete")
     public String announcementDelete(
-            @ModelAttribute Announce announcement,
-            OAuth2AuthenticationToken authenticationToken,
-            RedirectAttributes redirectAttrs){
-        User driver =  userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        if(announcement.getDriver().equals(driver)){
+          @ModelAttribute Announce announcement,
+          OAuth2AuthenticationToken authenticationToken,
+          RedirectAttributes redirectAttrs) {
+        User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        if (announcement.getDriver().equals(driver)) {
             announcementConsumer.delete(announcement);
             redirectAttrs
-                    .addFlashAttribute("mensaje", "Eliminado correctamente");
-        }else{
+                  .addFlashAttribute("mensaje", "Eliminado correctamente");
+        } else {
             redirectAttrs
-                    .addFlashAttribute("mensaje", "No tienes permiso para esta acción");
+                  .addFlashAttribute("mensaje", "No tienes permiso para esta acción");
         }
         return "redirect:/";
     }

@@ -1,7 +1,10 @@
 package es.uma.ingweb.coffeecar.consumers;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import es.uma.ingweb.coffeecar.entities.Bus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
@@ -15,11 +18,16 @@ import java.util.Objects;
 
 @Service
 public class BusConsumer {
-    private static final String CURRENT_POS_FROM_ALL_BUSES_URL = "http://localhost:8080/getBuses/all";
-    private static final String CURRENT_POS_BY_LINE_URL = "http://localhost:8080/getBuses/byLine?line=";
+    @Value("${server.url}")
+    private String SERVER_URL;
+    private String CURRENT_POS_FROM_ALL_BUSES_URL = SERVER_URL + "getBuses/all";
+    private String CURRENT_POS_BY_LINE_URL = SERVER_URL + "getBuses/byLine?line=";
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
+
+    public BusConsumer(RestTemplate restTemplate) {
+        this.restTemplate = new RestTemplate();
+    }
 
     public List<Bus> getAll() {
         final ResponseEntity<PagedModel<Bus>> busResponse = restTemplate
