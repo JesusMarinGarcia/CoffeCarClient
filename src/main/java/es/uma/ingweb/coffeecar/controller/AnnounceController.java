@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URI;
 import java.util.List;
 
 
@@ -45,11 +46,14 @@ public class AnnounceController {
         ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announce);
         jsonNodeAnnouncement.put("driver", driver.getLink("self").map(Link::getHref).get());
 
-        announcementConsumer.create(jsonNodeAnnouncement);
+        URI uri = announcementConsumer.create(jsonNodeAnnouncement);
+
+        Announce announce1 = announcementConsumer.getAnnouncementByURI(uri.toString());
 
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
-        return "redirect:/";
+
+        return "redirect:/details?announcementURI=" + announce1.getLink("self").map(Link::getHref).get();
     }
 
     @GetMapping("/createAnnouncement")

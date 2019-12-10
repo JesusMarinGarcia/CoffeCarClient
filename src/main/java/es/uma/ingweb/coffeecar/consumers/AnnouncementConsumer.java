@@ -106,8 +106,8 @@ public class AnnouncementConsumer {
                 .toObject(getUserCollectionType())).getContent());
     }
 
-    public void create(JsonNode announcement) {
-        restTemplate.postForLocation(URL, announcement);
+    public URI create(JsonNode announcement) {
+        return restTemplate.postForLocation(URL, announcement);
     }
 
     public void delete(Announce announce) {
