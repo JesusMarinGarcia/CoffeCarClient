@@ -75,20 +75,20 @@
     <div class="tab-pane active" id="availableAnnouncements">
         <div class="nav justify-content-center">
             <table style="width:100%">
-                <th:block th:each="announcement : ${announcementsAvailable}">
+                <th:block th:each="announce : ${announcementsAvailable}">
                     <tr>
                         <td>
-                            <div class="card mb-3" style="width:100%; margin-left: 1%; margin-right: 1%; padding-top: 1%">
+                            <div class="card mb-3"
+                                 style="width:100%; margin-left: 1%; margin-right: 1%; padding-top: 1%">
                                 <div class="card-body">
-                                    <h5 class="card-title" th:text="${announcement.title}"></h5>
-                                    <p style="text-align: center" class="card-text" th:text="${announcement.description}"></p>
+                                    <h5 class="card-title" th:text="${announce.title}"></h5>
+                                    <p style="text-align: center" class="card-text"
+                                       th:text="${announce.description}"></p>
                                     <div class="nav justify-content-center">
-                                        <p th:text="${announcement.selfURI}"></p>
-                                        <p th:text="${announcement.id}"></p>
-
-                                        <form th:action="@{editAnnouncement}" th:object="${announcement}">
-                                            <input type="hidden" name="announcementURI" th:value="${announcement}">
-                                            <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
+                                        <form th:action="@{announcementDetails(announcementURI=${announce.selfURI})}">
+                                            <button type="submit" style="margin-left: 5%" class="btn btn-light">Más
+                                                detalles
+                                            </button>
                                         </form>
                                     </div>
                                 </div>
@@ -102,16 +102,20 @@
         <div class="tab-pane" id="myTrips">
             <div class="nav justify-content-center">
                 <table>
-                    <th:block th:each="announcement : ${myTrips}">
-                        <tr >
+                    <th:block th:each="announce : ${myTrips}">
+                        <tr>
                             <td>
                                 <div class="card mb-3" style="margin-left: 1%; margin-right: 1%; padding-top: 1%">
                                     <div class="card-body">
-                                        <h5 class="card-title" th:text="${announcement.title}"></h5>
-                                        <p style="text-align: center" class="card-text" th:text="${announcement.description}"></p>
+                                        <h5 class="card-title" th:text="${announce.title}"></h5>
+                                        <p style="text-align: center" class="card-text"
+                                           th:text="${announce.description}"></p>
                                         <div class="nav justify-content-center">
-                                            <form th:action="@{announcementDetails(announcementURI=${announcement.selfURI})}">
-                                                <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
+                                            <form
+                                                th:action="@{announcementDetails(announcementURI=${announce.selfURI})}">
+                                                <button type="submit" style="margin-left: 5%" class="btn btn-light">Más
+                                                    detalles
+                                                </button>
                                             </form>
                                         </div>
                                     </div>

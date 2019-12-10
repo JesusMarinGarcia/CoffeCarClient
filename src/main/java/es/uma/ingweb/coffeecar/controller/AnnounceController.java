@@ -6,16 +6,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
 import es.uma.ingweb.coffeecar.consumers.StopConsumer;
 import es.uma.ingweb.coffeecar.consumers.UserConsumer;
-import es.uma.ingweb.coffeecar.entities.Announcement;
-import es.uma.ingweb.coffeecar.entities.BusStop;
+import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.List;
 
 
 @Controller
@@ -31,15 +28,15 @@ public class AnnounceController {
 
     @PostMapping("createAnnouncement/confirm")
     public String announce(
-            @ModelAttribute Announcement announcement,
-            OAuth2AuthenticationToken authenticationToken,
-            RedirectAttributes redirectAttrs/*,
+          @ModelAttribute Announce announce,
+          OAuth2AuthenticationToken authenticationToken,
+          RedirectAttributes redirectAttrs/*,
             @RequestParam (name = "fechaSalida") String fsalida,
             @RequestParam (name = "fechaLlegada") String fllegada*/
-            ){
+    ) {
         User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        if (announcement.getDescription() == null || announcement.getDescription().isEmpty()){
-            announcement.setDescription("No hay descripción");
+        if (announce.getDescription() == null || announce.getDescription().isEmpty()) {
+            announce.setDescription("No hay descripción");
         }
         /*DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         LocalDateTime departureDate = LocalDateTime.parse(fsalida, formatter);
@@ -48,10 +45,10 @@ public class AnnounceController {
         announcement.setArrivalDate(arrivalDate);*/
 
         ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announcement);
+        ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announce);
         jsonNodeAnnouncement.put("driver", driver.getSelfURI());
 
-        announcement.setSelfURI(announcementConsumer.create(jsonNodeAnnouncement));
+        announce.setSelfURI(announcementConsumer.create(jsonNodeAnnouncement));
 
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
@@ -60,7 +57,7 @@ public class AnnounceController {
 
     @GetMapping("/createAnnouncement")
     public String createAnnouncement(Model model){
-        model.addAttribute("anuncio",new Announcement());
+        model.addAttribute("anuncio", new Announce());
         return "createAnnouncement";
     }
 
