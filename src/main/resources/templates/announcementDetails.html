@@ -37,18 +37,15 @@
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <img th:src="@{CoffeeCarLogo.png}" src="../static/CoffeeCarLogo.png" class="img-fluid" alt="Responsive image" style="width: 60px">
-    <a class="navbar-brand" href="#">CoffeCar</a>
+    <img th:src="@{CoffeeCarLogo.png}" th:href="@{/}" src="../static/CoffeeCarLogo.png" class="img-fluid" alt="Responsive image" style="width: 60px">
+    <a class="navbar-brand" th:href="@{/}">CoffeCar</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-            <li class="nav-item active">
-                <a class="nav-link" href="#">Perfil <span class="sr-only">(current)</span></a>
-            </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Cerrar sesión</a>
+                <a class="nav-link" th:href="@{/logout}">Cerrar sesión</a>
             </li>
         </ul>
     </div>
@@ -68,12 +65,12 @@
 </div>
 
 <div th:if="${isPassenger} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
-    <form  method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+    <form  method="post" th:action="@{details/left}" th:object="${announcement}" style="margin-right: 1%; width: 45%">
         <input type="submit" value="Abandonar viaje" class="btn btn-dark btn-lg btn-block">
     </form>
 </div>
 <div th:if="${isPassenger} == false && ${announcement.getSeats()} > ${announcement.getPassengers().size()}" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
-    <form  method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+    <form  method="post" th:action="@{details/join}" th:object="${announcement}" style="margin-right: 1%; width: 45%">
         <input type="submit" value="Unirse al viaje" class="btn btn-primary btn-lg btn-block">
     </form>
 </div>
@@ -90,7 +87,7 @@
             <h6 class="lbl justify">Conductor</h6>
             <p class="justify" th:text="*{driver.getName()}"></p>
             <h6 class="lbl justify">Asientos ocupados/total</h6>
-            <p class="justify lbl" th:text="*{seats}"></p>
+            <p class="justify lbl" th:text="*{passengers.size() + '/' + seats}"></p>
             <button class="btn btn-secondary btn-sm" onclick="mostarOcultarPasajeros()" id="mostrar">Mostrar pasajeros
             </button>
         </div>

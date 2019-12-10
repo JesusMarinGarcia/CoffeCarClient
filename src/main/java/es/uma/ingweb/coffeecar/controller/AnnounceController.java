@@ -13,10 +13,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -79,6 +76,42 @@ public class AnnounceController {
         model.addAttribute("announcement", announcement);
         model.addAttribute("paradas", stops);
         return "announcementDetails";
+    }
+
+    @PutMapping("details/join")
+    public String joinAnnouncement(
+            @ModelAttribute Announce announce,
+            OAuth2AuthenticationToken authenticationToken,
+            RedirectAttributes redirectAttrs
+    ){
+        User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        if(announce.getPassengers().add(user)){
+            announcementConsumer.edit(announce);
+            redirectAttrs
+                    .addFlashAttribute("mensaje", "Te has unido al viaje");
+        }else {
+            redirectAttrs
+                    .addFlashAttribute("mensaje", "No has podido unirte o ya estabas unido");
+        }
+        return "/";
+    }
+
+    @PutMapping("details/left")
+    public String leftAnnouncement(
+            @ModelAttribute Announce announce,
+            OAuth2AuthenticationToken authenticationToken,
+            RedirectAttributes redirectAttrs
+    ){
+        User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        if(announce.getPassengers().remove(user)){
+            announcementConsumer.edit(announce);
+            redirectAttrs
+                    .addFlashAttribute("mensaje", "Has dejado el viaje");
+        }else {
+            redirectAttrs
+                    .addFlashAttribute("mensaje", "No has podido dejarlo o ya no estabas unido");
+        }
+        return "/";
     }
 
     @GetMapping("/announcementDelete")
