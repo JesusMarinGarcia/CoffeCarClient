@@ -5,6 +5,7 @@ import com.sun.nio.sctp.AbstractNotificationHandler;
 import es.uma.ingweb.coffeecar.RestTemplateProxy;
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -23,7 +24,8 @@ import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
 @Service
 public class AnnouncementConsumer {
-    private static final String URL = "http://localhost:8080/api/announces";
+    @Value("${server.url}")
+    private String SERVER_URL;
 
     private final RestTemplate restTemplate;
     private final Traverson traverson;
@@ -103,7 +105,7 @@ public class AnnouncementConsumer {
     }
 
     public void create(JsonNode announcement) {
-        restTemplate.postForLocation(URL, announcement);
+        restTemplate.postForLocation(SERVER_URL + "announces", announcement);
     }
 
     public void delete(Announce announce) {
@@ -111,7 +113,7 @@ public class AnnouncementConsumer {
     }
 
     public void edit(Announce announce) {
-        restTemplate.put(URL, announce, Announce.class);
+        restTemplate.put(SERVER_URL + "announces", announce, Announce.class);
     }
 
     private static ParameterizedTypeReference<PagedModel<Announce>> getParameterizedTypeReference() {

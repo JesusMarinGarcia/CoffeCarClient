@@ -3,6 +3,7 @@ package es.uma.ingweb.coffeecar.consumers;
 
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -18,7 +19,8 @@ import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
 @Service
 public class UserConsumer {
-    private static final String URL = "http://localhost:8080/api/users";
+    @Value("${server.url}")
+    private String SERVER_URL;
 
     private final RestTemplate restTemplate;
     private final Traverson traverson;
@@ -70,15 +72,15 @@ public class UserConsumer {
     }
 
     public void create(User user) {
-        restTemplate.postForLocation(URL, user);
+        restTemplate.postForLocation(SERVER_URL+"users", user);
     }
 
     public void edit(User user) {
-        restTemplate.put(URL, user, User.class);
+        restTemplate.put(SERVER_URL+"users", user, User.class);
     }
 
     public void delete(User user) {
-        restTemplate.delete(URL, user, User.class);
+        restTemplate.delete(SERVER_URL+"users", user, User.class);
     }
 
 
