@@ -3,13 +3,13 @@ package es.uma.ingweb.coffeecar.consumers;
 import com.fasterxml.jackson.databind.JsonNode;
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.client.Traverson;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,8 @@ import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
 @Service
 public class AnnouncementConsumer {
-    private static final String URL = "http://localhost:8080/api/announces";
+    @Value("${server.url}")
+    private String SERVER_URL;
 
     private final RestTemplate restTemplate;
     private final Traverson traverson;
@@ -104,20 +105,19 @@ public class AnnouncementConsumer {
                 .toObject(getUserCollectionType())).getContent());
     }
 
-    public void create(JsonNode announcement) {
-        restTemplate.postForLocation(URL, announcement);
+    public URI create(JsonNode announcement) {
+        return restTemplate.postForLocation(SERVER_URL + "announces", announcement);
     }
 
-    public void delete(Announce announce) {
-        restTemplate.delete(announce.getSelfURI());
-
-    }
 
     public void edit(Announce announce) {
 
         restTemplate.put(announce.getLink("self").map(Link::getHref).get(), new HttpEntity(announce), Announce.class
                 , announce.getId());
-
+}
+    public void delete(String uri) {
+          restTemplate.delete(uri);
+}
     }
 
     private static ParameterizedTypeReference<PagedModel<Announce>> getParameterizedTypeReference() {

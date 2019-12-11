@@ -1,5 +1,6 @@
 package es.uma.ingweb.coffeecar.entities;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.hateoas.EntityModel;
 import java.util.List;
 
 @Data
+@JsonSerialize
 @NoArgsConstructor
 @AllArgsConstructor
 public class Announce extends EntityModel<Announce> {
@@ -25,7 +27,4 @@ public class Announce extends EntityModel<Announce> {
     private int seats;
     private User driver;
     private List<User> passengers;
-    private String selfURI;
-    private String driverURI;
-    private String passengersURI;
 }

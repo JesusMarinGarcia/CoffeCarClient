@@ -16,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URI;
 import java.util.List;
 
 
@@ -34,10 +35,10 @@ public class AnnounceController {
 
     @PostMapping("createAnnouncement/confirm")
     public String announce(
-            @ModelAttribute Announce announce,
-            OAuth2AuthenticationToken authenticationToken,
-            RedirectAttributes redirectAttrs
-            ){
+          @ModelAttribute Announce announce,
+          OAuth2AuthenticationToken authenticationToken,
+          RedirectAttributes redirectAttrs
+    ) {
         User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if (announce.getDescription() == null || announce.getDescription().isEmpty()) {
             announce.setDescription("No hay descripción");
@@ -47,52 +48,89 @@ public class AnnounceController {
         ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announce);
         jsonNodeAnnouncement.put("driver", driver.getLink("self").map(Link::getHref).get());
 
-        announcementConsumer.create(jsonNodeAnnouncement);
+        URI uri = announcementConsumer.create(jsonNodeAnnouncement);
+
+        Announce announceAux = announcementConsumer.getAnnouncementByURI(uri.toString());
 
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
-        return "redirect:/";
+
+        return "redirect:/details?announcementURI=" + announceAux.getLink("self").map(Link::getHref).get();
     }
 
     @GetMapping("/createAnnouncement")
-    public String createAnnouncement(Model model){
+    public String createAnnouncement(Model model) {
         model.addAttribute("anuncio", new Announce());
         return "createAnnouncement";
     }
 
     @GetMapping("/details")
     public String announcementDetails(
-            @RequestParam(name="announcementURI") String uri,
-            Model model,
-            OAuth2AuthenticationToken authenticationToken){
+          @RequestParam(name = "announcementURI") String uri,
+          Model model,
+          OAuth2AuthenticationToken authenticationToken) {
         Announce announcement = announcementConsumer.getAnnouncementByURI(uri);
-
-        List<BusStop> stops = stopConsumer.getNearby((float)announcement.getDepartureLatitude(),(float)announcement.getDepartureLongitude());
+        List<BusStop> stops = stopConsumer
+              .getNearby(announcement.getDepartureLatitude(), announcement.getDepartureLongitude());
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver = announcement.getDriver()
-                .equals(user);
+              .equals(user);
         boolean isPassenger = announcement.getPassengers().contains(user);
+        boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().size());
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
         model.addAttribute("announcement", announcement);
+        model.addAttribute("canJoin",canJoin);
         model.addAttribute("paradas", stops);
         return "announcementDetails";
     }
 
-    @GetMapping("/announcementDelete")
-    public String announcementDelete(
-            @ModelAttribute Announce announcement,
+    @PostMapping("details/join")
+    public String joinAnnouncement(
+            @RequestParam(name = "announcementURI") String uri,
             OAuth2AuthenticationToken authenticationToken,
-            RedirectAttributes redirectAttrs){
-        User driver =  userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        if(announcement.getDriver().equals(driver)){
-            announcementConsumer.delete(announcement);
+            RedirectAttributes redirectAttrs
+    ){
+        Announce announce = announcementConsumer.getAnnouncementByURI(uri);
+        User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        if(announce.getPassengers().add(user)){
+            announcementConsumer.edit(announce);
             redirectAttrs
-                    .addFlashAttribute("mensaje", "Eliminado correctamente");
-        }else{
+                    .addFlashAttribute("mensaje", "Te has unido al viaje");
+        }else {
             redirectAttrs
-                    .addFlashAttribute("mensaje", "No tienes permiso para esta acción");
+                    .addFlashAttribute("mensaje", "No has podido unirte o ya estabas unido");
         }
+        return "/";
+    }
+
+    @PostMapping("details/left")
+    public String leftAnnouncement(
+            @RequestParam(name = "announcementURI") String uri,
+            OAuth2AuthenticationToken authenticationToken,
+            RedirectAttributes redirectAttrs
+    ){
+        Announce announce = announcementConsumer.getAnnouncementByURI(uri);
+        User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        if(announce.getPassengers().remove(user)){
+            announcementConsumer.edit(announce);
+            redirectAttrs
+                    .addFlashAttribute("mensaje", "Has dejado el viaje");
+        }else {
+            redirectAttrs
+                    .addFlashAttribute("mensaje", "No has podido dejarlo o ya no estabas unido");
+        }
+        return "/";
+    }
+
+    @PostMapping("/announcementDelete")
+    public String announcementDelete(
+            @RequestParam(name = "announcementURI") String uri,
+            RedirectAttributes redirectAttrs) {
+
+        announcementConsumer.delete(uri);
+        redirectAttrs
+                .addFlashAttribute("mensaje", "Eliminado correctamente");
         return "redirect:/";
     }
 

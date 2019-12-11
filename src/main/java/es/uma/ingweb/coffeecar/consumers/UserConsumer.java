@@ -1,13 +1,13 @@
 package es.uma.ingweb.coffeecar.consumers;
 
-import es.uma.ingweb.coffeecar.RestTemplateProxy;
+
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.client.Traverson;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,12 +19,13 @@ import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
 @Service
 public class UserConsumer {
-    private static final String URL = "http://localhost:8080/api/users";
+    @Value("${server.url}")
+    private String SERVER_URL;
 
     private final RestTemplate restTemplate;
     private final Traverson traverson;
 
-    public UserConsumer(RestTemplate restTemplate, RestTemplateProxy restTemplateProxy, Traverson traverson) {
+    public UserConsumer(RestTemplate restTemplate, Traverson traverson) {
         this.restTemplate = restTemplate;
         this.traverson = traverson;
     }
@@ -52,7 +53,7 @@ public class UserConsumer {
         String ownedAnnouncesLink = userEntityModel.getLink("ownedAnnounces").map(Link::getHref).get();
         String joinedAnnouncesLink = userEntityModel.getLink("joinedAnnounces").map(Link::getHref).get();
 
-        Objects.requireNonNull(user).setOwnedAnnounces(getAnnounces(URI.create(ownedAnnouncesLink), "ownedAnnounces"));
+        user.setOwnedAnnounces(getAnnounces(URI.create(ownedAnnouncesLink), "ownedAnnounces"));
         user.setJoinedAnnounces(getAnnounces(URI.create(joinedAnnouncesLink), "joinedAnnounces"));
 
         user.add(userEntityModel.getLinks());
@@ -66,20 +67,20 @@ public class UserConsumer {
     }
 
     private ParameterizedTypeReference<CollectionModel<Announce>> getAnnounceCollectionType() {
-        return new ParameterizedTypeReference<CollectionModel<Announce>>() {
+        return new ParameterizedTypeReference<>() {
         };
     }
 
     public void create(User user) {
-        restTemplate.postForLocation(URL, user);
+        restTemplate.postForLocation(SERVER_URL+"users", user);
     }
 
     public void edit(User user) {
-        restTemplate.put(URL, user, User.class);
+        restTemplate.put(SERVER_URL+"users", user, User.class);
     }
 
     public void delete(User user) {
-        restTemplate.delete(URL, user, User.class);
+        restTemplate.delete(SERVER_URL+"users", user, User.class);
     }
 
 

@@ -37,18 +37,15 @@
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <img th:src="@{CoffeeCarLogo.png}" src="../static/CoffeeCarLogo.png" class="img-fluid" alt="Responsive image" style="width: 60px">
-    <a class="navbar-brand" href="#">CoffeCar</a>
+    <img th:src="@{CoffeeCarLogo.png}" th:href="@{/}" src="../static/CoffeeCarLogo.png" class="img-fluid" alt="Responsive image" style="width: 60px">
+    <a class="navbar-brand" th:href="@{/}">CoffeCar</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-            <li class="nav-item active">
-                <a class="nav-link" href="#">Perfil <span class="sr-only">(current)</span></a>
-            </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Cerrar sesión</a>
+                <a class="nav-link" th:href="@{/logout}">Cerrar sesión</a>
             </li>
         </ul>
     </div>
@@ -64,18 +61,21 @@
 </div>
     <div class="nav container-fluid justify-content-center">
     <form th:action="@{announcementDelete}" method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%" >
+        <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
         <input type="submit" value="Eliminar" class="btn btn-danger btn-lg btn-block">
     </form>
     </div>
 </div>
 
 <div th:if="${isPassenger} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
-    <form  method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+    <form  method="post" th:action="@{details/left}" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+        <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
         <input type="submit" value="Abandonar viaje" class="btn btn-dark btn-lg btn-block">
     </form>
 </div>
-<div th:if="${isPassenger} == false && ${announcement.getSeats()} > ${announcement.getPassengers().size()}" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
-    <form  method="post" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+<div th:if="${canJoin} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
+    <form  method="post" th:action="@{details/join}" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+        <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
         <input type="submit" value="Unirse al viaje" class="btn btn-primary btn-lg btn-block">
     </form>
 </div>
@@ -92,7 +92,7 @@
             <h6 class="lbl justify">Conductor</h6>
             <p class="justify" th:text="*{driver.getName()}"></p>
             <h6 class="lbl justify">Asientos ocupados/total</h6>
-            <p class="justify lbl" th:text="*{seats}"></p>
+            <p class="justify lbl" th:text="*{passengers.size() + '/' + seats}"></p>
             <button class="btn btn-secondary btn-sm" onclick="mostarOcultarPasajeros()" id="mostrar">Mostrar pasajeros
             </button>
         </div>
@@ -141,25 +141,12 @@
 <br>
 <script th:inline="javascript">
     var lati = /*[[${announcement.departureLatitude}]]*/ 1.1;
-    var longi = /*[[${announcement.getDepartureLongitude}]]*/ 1.1;
+    var longi = /*[[${announcement.departureLongitude}]]*/ 1.1;
 
     L.mapbox.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
     var map = L.mapbox.map('map')
         .setView([lati,longi], 12)
         .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
-
-    var stops = /*[[${paradas}]]*/ [];
-
-    stops.forEach(function (parada, index) {
-        L.marker([parada.lat, parada.lon], {
-            icon: L.mapbox.marker.icon({
-                'marker-size': 'small',
-                'marker-symbol': 'bus',
-                'marker-color': '#FF3633'
-            })
-        }).addTo(map);
-        marker.bindPopup("<b>Linea " +  parada.codLinea  + "</b><br>Parada " + parada.codParada)
-    })
 
     L.marker([lati, longi], {
         icon: L.mapbox.marker.icon({
@@ -168,6 +155,19 @@
             'marker-color': '#3ab3da'
         })
     }).addTo(map);
+
+    var stops = /*[[${paradas}]]*/ [];
+
+    stops.forEach(function (parada, index) {
+        var marker = L.marker([parada.lat, parada.lon], {
+            icon: L.mapbox.marker.icon({
+                'marker-size': 'small',
+                'marker-symbol': 'bus',
+                'marker-color': '#FF3633'
+            })
+        }).addTo(map);
+        marker.bindPopup("<b>Linea " +  parada.codLinea  + "</b><br>Parada " + parada.codParada)
+    })
 
     /*L.marker([36.75016, -4.42034], {
         icon: L.mapbox.marker.icon({
