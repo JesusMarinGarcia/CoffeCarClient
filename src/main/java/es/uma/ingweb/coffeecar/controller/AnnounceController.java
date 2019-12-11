@@ -9,6 +9,7 @@ import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.BusStop;
 import es.uma.ingweb.coffeecar.entities.User;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.URI;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -109,7 +112,10 @@ public class AnnounceController {
     ){
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        if(announce.getPassengers().getContent().remove(user)){
+        Collection<User> newPassengers = new HashSet<>(announce.getPassengers().getContent());
+        boolean successfulRemoval = newPassengers.remove(user);
+        if(successfulRemoval){
+            announce.setPassengers(new CollectionModel<>(newPassengers));
             announcementConsumer.edit(announce);
             redirectAttrs
                     .addFlashAttribute("mensaje", "Has dejado el viaje");
@@ -117,7 +123,7 @@ public class AnnounceController {
             redirectAttrs
                     .addFlashAttribute("mensaje", "No has podido dejarlo o ya no estabas unido");
         }
-        return "/";
+        return "redirect:/";
     }
 
     @PostMapping("/announcementDelete")
