@@ -102,9 +102,8 @@ public class AnnouncementConsumer {
         return restTemplate.postForLocation(SERVER_URL + "announces", announcement);
     }
 
-    public void edit(Announce announce) {
-        restTemplate.put(announce.getLink("self").map(Link::getHref).get(), new HttpEntity(announce), Announce.class
-                , announce.getId());
+    public void edit(JsonNode announce) {
+        restTemplate.put(SERVER_URL + "announces",announce);
     }
     public void delete(String uri) {
           restTemplate.delete(uri);

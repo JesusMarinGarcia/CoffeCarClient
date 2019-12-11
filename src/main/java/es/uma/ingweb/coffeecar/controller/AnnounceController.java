@@ -1,7 +1,9 @@
 package es.uma.ingweb.coffeecar.controller;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
 import es.uma.ingweb.coffeecar.consumers.StopConsumer;
@@ -78,8 +80,8 @@ public class AnnounceController {
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver = announcement.getDriver()
               .equals(user);
-        boolean isPassenger = announcement.getPassengers().getContent().contains(user);
-        boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().getContent().size()) && !isDriver;
+        boolean isPassenger = announcement.getPassengers().contains(user);
+        boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().size()) && !isDriver;
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
         model.addAttribute("announcement", announcement);
@@ -96,8 +98,14 @@ public class AnnounceController {
     ){
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        if(!announce.getPassengers().getContent().contains(user) && announce.getPassengers().getContent().add(user)){
-            announcementConsumer.edit(announce);
+        List<User> passengers = announce.getPassengers();
+        if(!passengers.contains(user) && passengers.add(user)){
+            ObjectMapper objectMapper = new ObjectMapper();
+            ArrayNode arrayNode = objectMapper.valueToTree(passengers);
+            ObjectNode passengersNode = objectMapper.valueToTree(announce);
+            passengersNode.putArray("passengers").addAll(arrayNode);
+            JsonNode result = objectMapper.createObjectNode().set("passengers", passengersNode);
+            announcementConsumer.edit(result);
             redirectAttrs
                     .addFlashAttribute("mensaje", "Te has unido al viaje");
         }
@@ -161,15 +169,15 @@ public class AnnounceController {
         //no se porque se borra el driver y passeenger
         announce.setDriver(user);
         announce.setPassengers(announce1.getPassengers());
-        boolean isPassenger = announce.getPassengers().getContent().contains(user);
-        boolean canJoin = !isPassenger && (announce.getSeats() > announce.getPassengers().getContent().size());
+        boolean isPassenger = announce.getPassengers()!announce.getPassengers().contains(user);
+        boolean canJoin = !isPassenger && (announce.getSeats() > announce.getPassengers().size());
         List<BusStop> stops = stopConsumer.getNearby(announce.getDepartureLatitude(), announce.getDepartureLongitude());
         model.addAttribute("isDriver", true);
         model.addAttribute("isPassenger", isPassenger);
         model.addAttribute("announcement", announce);
         model.addAttribute("canJoin",canJoin);
         model.addAttribute("paradas", stops);
-        announcementConsumer.edit(announce);
+        //announcementConsumer.edit(announce);
 
         return "announcementDetails";
     }
