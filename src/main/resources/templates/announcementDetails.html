@@ -67,11 +67,13 @@
 
 <div th:if="${isPassenger} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
     <form  method="post" th:action="@{details/left}" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+        <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
         <input type="submit" value="Abandonar viaje" class="btn btn-dark btn-lg btn-block">
     </form>
 </div>
 <div th:if="${canJoin} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
     <form  method="post" th:action="@{details/join}" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+        <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
         <input type="submit" value="Unirse al viaje" class="btn btn-primary btn-lg btn-block">
     </form>
 </div>

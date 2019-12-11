@@ -76,7 +76,7 @@ public class AnnounceController {
         boolean isDriver = announcement.getDriver()
               .equals(user);
         boolean isPassenger = announcement.getPassengers().contains(user);
-        boolean canJoin = isPassenger && (announcement.getSeats() > announcement.getPassengers().size());
+        boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().size());
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
         model.addAttribute("announcement", announcement);
@@ -85,12 +85,13 @@ public class AnnounceController {
         return "announcementDetails";
     }
 
-    @PutMapping("details/join")
+    @PostMapping("details/join")
     public String joinAnnouncement(
-            @ModelAttribute Announce announce,
+            @RequestParam(name = "announcementURI") String uri,
             OAuth2AuthenticationToken authenticationToken,
             RedirectAttributes redirectAttrs
     ){
+        Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if(announce.getPassengers().add(user)){
             announcementConsumer.edit(announce);
@@ -103,12 +104,13 @@ public class AnnounceController {
         return "/";
     }
 
-    @PutMapping("details/left")
+    @PostMapping("details/left")
     public String leftAnnouncement(
-            @ModelAttribute Announce announce,
+            @RequestParam(name = "announcementURI") String uri,
             OAuth2AuthenticationToken authenticationToken,
             RedirectAttributes redirectAttrs
     ){
+        Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if(announce.getPassengers().remove(user)){
             announcementConsumer.edit(announce);
