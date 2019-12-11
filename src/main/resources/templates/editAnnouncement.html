@@ -14,10 +14,6 @@
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-
-
-
-
     <script>
         $("document").ready(function() {
 
@@ -175,12 +171,15 @@
         <div id="mapDes" style="width: 45%; height: 300px; margin-left: 20px; border: 4px solid indianred"></div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
+        var lati = /*[[${announce.departureLatitude}]]*/ 1.1;
+        var longi = /*[[${announce.departureLongitude}]]*/ 1.1;
+
         mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
         var map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v11',
-            center: [-4.42034, 36.72016],
+            center: [longi, lati],
             zoom: 11
         });
 
@@ -203,7 +202,7 @@
         var marker = new mapboxgl.Marker({
             draggable: true
         })
-            .setLngLat([-4.42034, 36.72016])
+            .setLngLat([longi, lati])
             .addTo(map);
         var lngLat = marker.getLngLat();
         str = JSON.stringify(lngLat);
@@ -240,12 +239,14 @@
 
     </script>
 
-    <script>
+    <script th:inline="javascript">
+        var lo = /*[[${announce.arrivalLongitude}]]*/ 1.1;
+        var la = /*[[${announce.arrivalLatitude}]]*/ 1.1;
         mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
         var mapDes = new mapboxgl.Map({
             container: 'mapDes',
             style: 'mapbox://styles/mapbox/streets-v11',
-            center: [-4.42034, 36.72016],
+            center: [lo, la],
             zoom: 11
         });
 
@@ -270,7 +271,7 @@
         var markerDes = new mapboxgl.Marker({
             draggable: true
         })
-            .setLngLat([-4.42034, 36.72016])
+            .setLngLat([lo, la])
             .addTo(mapDes);
 
         var lngLatDes = markerDes.getLngLat();
