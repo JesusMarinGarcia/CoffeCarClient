@@ -74,7 +74,7 @@ public class AnnouncementConsumer {
 
         CollectionModel<Announce> announces = traversalBuilder.toObject(getParameterizedTypeReference());
 
-        return new ArrayList<>(Objects.requireNonNull(announces).getContent());
+        return setParams(new ArrayList<>(Objects.requireNonNull(announces).getContent()));
     }
 
     private Announce setParams(Announce announcement){
