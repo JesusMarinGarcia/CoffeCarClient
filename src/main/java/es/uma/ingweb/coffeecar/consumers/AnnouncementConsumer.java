@@ -48,7 +48,7 @@ public class AnnouncementConsumer {
               );
 
         Announce announce = Objects.requireNonNull(announcementResponseEntity.getBody()).getContent();
-        Objects.requireNonNull(announce).add(announcementResponseEntity.getBody().getLinks());
+        announce.add(announcementResponseEntity.getBody().getLinks());
 
         return setParams(announce);
     }
@@ -74,15 +74,13 @@ public class AnnouncementConsumer {
 
         CollectionModel<Announce> announces = traversalBuilder.toObject(getParameterizedTypeReference());
 
-        return setParams(new ArrayList<>(Objects.requireNonNull(announces).getContent()));
+        return new ArrayList<>(Objects.requireNonNull(announces).getContent());
     }
 
     private Announce setParams(Announce announcement){
         String driver = announcement.getLink("driver").map(Link::getHref).get();
-        String passengers = announcement.getLink("passengers").map(Link::getHref).get();
 
-        Objects.requireNonNull(announcement).setDriver(getDriver(URI.create(driver)));
-        announcement.setPassengers(getPassengers(URI.create(passengers)));
+        announcement.setDriver(getDriver(URI.create(driver)));
 
         return announcement;
     }
@@ -100,19 +98,11 @@ public class AnnouncementConsumer {
                 .toObject(getUserEntityModelParameterizedTypeReference())).getContent();
     }
 
-    public List<User> getPassengers(URI uri){
-        return new ArrayList<>(Objects.requireNonNull(new Traverson(uri, HAL_JSON)
-                .follow("self")
-                .toObject(getUserCollectionType())).getContent());
-    }
-
     public URI create(JsonNode announcement) {
         return restTemplate.postForLocation(SERVER_URL + "announces", announcement);
     }
 
-
     public void edit(Announce announce) {
-
         restTemplate.put(announce.getLink("self").map(Link::getHref).get(), new HttpEntity(announce), Announce.class
                 , announce.getId());
     }
@@ -133,11 +123,6 @@ public class AnnouncementConsumer {
 
     private static ParameterizedTypeReference<EntityModel<User>> getUserEntityModelParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {
-        };
-    }
-
-    private ParameterizedTypeReference<CollectionModel<User>> getUserCollectionType() {
-        return new ParameterizedTypeReference<CollectionModel<User>>() {
         };
     }
 }
