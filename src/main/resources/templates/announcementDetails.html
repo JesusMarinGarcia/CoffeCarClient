@@ -55,7 +55,7 @@
     <div class="nav container-fluid justify-content-center">
         <form th:action="@{editarAnuncio}">
             <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
-            <button type="submit" style="margin-left: 5%" class="btn btn-light">Más detalles</button>
+            <input type="submit" value="Modificar" class="btn btn-danger btn-lg btn-block">
         </form>
     </div>
 </div>

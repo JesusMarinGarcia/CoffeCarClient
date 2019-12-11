@@ -138,39 +138,36 @@ public class AnnounceController {
     @GetMapping("/editarAnuncio")
     public String editAnnouncement(@RequestParam(name="announcementURI") String uri,
                                    Model model){
-            System.out.println(uri);
+
             Announce announce = announcementConsumer.getAnnouncementByURI(uri);
             model.addAttribute("announce", announce);
             model.addAttribute("uri",uri);
         return "editAnnouncement";
     }
     //metodo cuando se modifica el anuncio
-    @PutMapping("/editarAnuncio/confirm")
-    public String changeAnnouncement(@ModelAttribute Announce announce,@RequestParam("UriAnnounce") String uri, Model model,
-                                     OAuth2AuthenticationToken authenticationToken, RedirectAttributes redirectAttrs){
+    @PostMapping("/editarAnuncio/confirm")
+    public String changeAnnouncement(@ModelAttribute Announce announce,@RequestParam("announcementURI") String uri,
+                                     Model model, OAuth2AuthenticationToken authenticationToken){
         if (announce.getDescription() == null || announce.getDescription().isEmpty()) {
             announce.setDescription("No hay descripción");
         }
 
         Announce announce1 = announcementConsumer.getAnnouncementByURI(uri);
         announce.add(announce1.getLinks());
+        User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+        //no se porque se borra el driver y passeenger
+        announce.setDriver(user);
+        announce.setPassengers(announce1.getPassengers());
+        boolean isPassenger = announce.getPassengers().contains(user);
+        boolean canJoin = !isPassenger && (announce.getSeats() > announce.getPassengers().size());
+        List<BusStop> stops = stopConsumer.getNearby(announce.getDepartureLatitude(), announce.getDepartureLongitude());
+        model.addAttribute("isDriver", true);
+        model.addAttribute("isPassenger", isPassenger);
+        model.addAttribute("announcement", announce);
+        model.addAttribute("canJoin",canJoin);
+        model.addAttribute("paradas", stops);
         announcementConsumer.edit(announce);
 
-
-
-    /*
-        List<BusStop> stops = stopConsumer
-                .getNearby((float)announcement.getDepartureLatitude(),(float)announcement.getDepartureLongitude());
-        User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        boolean isDriver = announcement.getDriver()
-                .equals(user);
-        boolean isPassenger = announcement.getPassengers().contains(user);
-        model.addAttribute("isDriver", isDriver);
-        model.addAttribute("isPassenger", isPassenger);
-        model.addAttribute("announcement", announcement);
-        model.addAttribute("paradas", stops);*/
-        redirectAttrs
-                .addFlashAttribute("mensaje", "Agregado correctamente");
-        return "redirect:/";
+        return "announcementDetails";
     }
 }

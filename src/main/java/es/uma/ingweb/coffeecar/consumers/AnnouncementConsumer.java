@@ -10,6 +10,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.client.Traverson;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -114,11 +115,11 @@ public class AnnouncementConsumer {
 
         restTemplate.put(announce.getLink("self").map(Link::getHref).get(), new HttpEntity(announce), Announce.class
                 , announce.getId());
-}
+    }
     public void delete(String uri) {
           restTemplate.delete(uri);
-}
     }
+
 
     private static ParameterizedTypeReference<PagedModel<Announce>> getParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {
