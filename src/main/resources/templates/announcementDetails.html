@@ -67,7 +67,7 @@
 </div>
 
 <div style="padding-left: 5%; padding-right: 5%;">
-<div th:if="${isPassenger} == true" class="nav container-fluid justify-content-center" style="margin-top: 1%">
+<div th:if="${canLeft} == true" class="nav container-fluid justify-content-center" style="margin-top: 1%">
     <form  method="post" th:action="@{details/left}" th:object="${announcement}" style="width: 45%">
         <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
         <input type="submit" value="Abandonar viaje" class="btn btn-dark btn-lg btn-block">

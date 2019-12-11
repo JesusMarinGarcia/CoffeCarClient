@@ -86,11 +86,13 @@ public class AnnounceController {
               .equals(user);
         boolean isPassenger = announcement.getPassengers().getContent().contains(user);
         boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().getContent().size()) && !isDriver;
+        boolean canLeft = !isDriver && isPassenger;
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
         model.addAttribute("announcement", announcement);
         model.addAttribute("canJoin",canJoin);
         model.addAttribute("paradas", stops);
+        model.addAttribute("canLeft", canLeft);
         model.addAttribute("paradasLlegada", stopsArrival);
         return "announcementDetails";
     }
