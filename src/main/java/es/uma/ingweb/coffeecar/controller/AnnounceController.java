@@ -84,8 +84,8 @@ public class AnnounceController {
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver = announcement.getDriver()
               .equals(user);
-        boolean isPassenger = announcement.getPassengers().contains(user);
-        boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().size()) && !isDriver;
+        boolean isPassenger = announcement.getPassengers().getContent().contains(user);
+        boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().getContent().size()) && !isDriver;
         boolean canLeft = !isDriver && isPassenger;
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
@@ -105,7 +105,7 @@ public class AnnounceController {
     ) throws IOException {
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        List<User> passengers = (List<User>) announce.getPassengers();
+        List<User> passengers = new ArrayList<>(announce.getPassengers().getContent());
         if(!passengers.contains(user) && passengers.add(user)){
             announcementConsumer.edit(announce);
             redirectAttrs
@@ -122,10 +122,10 @@ public class AnnounceController {
     ){
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        List<User> newPassengers = announce.getPassengers();
+        Collection<User> newPassengers = new HashSet<>(announce.getPassengers().getContent());
         boolean successfulRemoval = newPassengers.remove(user);
         if(successfulRemoval){
-            announce.setPassengers(newPassengers);
+            announce.setPassengers(new CollectionModel<>(newPassengers));
             //announcementConsumer.edit(announce);
             redirectAttrs
                     .addFlashAttribute("mensaje", "Has dejado el viaje");
@@ -171,8 +171,8 @@ public class AnnounceController {
         //no se porque se borra el driver y passeenger
         announce.setDriver(user);
         announce.setPassengers(announce1.getPassengers());
-        boolean isPassenger = announce.getPassengers().contains(user);
-        boolean canJoin = !isPassenger && (announce.getSeats() > announce.getPassengers().size());
+        boolean isPassenger = announce.getPassengers().getContent().contains(user);
+        boolean canJoin = !isPassenger && (announce.getSeats() > announce.getPassengers().getContent().size());
         List<BusStop> stops = stopConsumer.getNearby(announce.getDepartureLatitude(), announce.getDepartureLongitude());
         model.addAttribute("isDriver", true);
         model.addAttribute("isPassenger", isPassenger);

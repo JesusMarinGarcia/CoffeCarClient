@@ -28,5 +28,6 @@ public class Announce extends EntityModel<Announce> {
     private String imgLink;
     private int seats;
     private User driver;
-    private List<User> passengers;
+    @JsonUnwrapped
+    private CollectionModel<User> passengers;
 }

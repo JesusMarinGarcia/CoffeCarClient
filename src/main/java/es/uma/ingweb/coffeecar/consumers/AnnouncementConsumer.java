@@ -79,17 +79,10 @@ public class AnnouncementConsumer {
 
     private Announce setParams(Announce announcement){
         String driver = announcement.getLink("driver").map(Link::getHref).get();
-        String passengers = announcement.getLink("passengers").map(Link::getHref).get();
+
         announcement.setDriver(getDriver(URI.create(driver)));
-        announcement.setPassengers(getPassengers(URI.create(passengers)));
 
         return announcement;
-    }
-
-    public List<User> getPassengers(URI uri){
-        return new ArrayList<>(Objects.requireNonNull(new Traverson(uri, HAL_JSON)
-                .follow("self")
-                .toObject(getUserCollectionType())).getContent());
     }
 
     private List<Announce> setParams(List<Announce> announcements){
@@ -117,10 +110,6 @@ public class AnnouncementConsumer {
           restTemplate.delete(uri);
     }
 
-    private ParameterizedTypeReference<CollectionModel<User>> getUserCollectionType() {
-        return new ParameterizedTypeReference<CollectionModel<User>>() {
-        };
-    }
 
     private static ParameterizedTypeReference<PagedModel<Announce>> getParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {
