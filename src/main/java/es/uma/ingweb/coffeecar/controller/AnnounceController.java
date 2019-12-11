@@ -13,7 +13,10 @@ import org.springframework.hateoas.Link;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.URI;
@@ -32,6 +35,12 @@ public class AnnounceController {
         this.userConsumer = userConsumer;
         this.stopConsumer = stopConsumer;
     }
+    private ObjectNode joinObject (Announce obj, String relation, String uri){
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(obj);
+        jsonNodeAnnouncement.put(relation, uri);
+        return jsonNodeAnnouncement;
+    }
 
     @PostMapping("createAnnouncement/confirm")
     public String announce(
@@ -44,11 +53,9 @@ public class AnnounceController {
             announce.setDescription("No hay descripción");
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announce);
-        jsonNodeAnnouncement.put("driver", driver.getLink("self").map(Link::getHref).get());
+        ObjectNode obj = joinObject(announce,"driver", driver.getLink("self").map(Link::getHref).get());
 
-        URI uri = announcementConsumer.create(jsonNodeAnnouncement);
+        URI uri = announcementConsumer.create(obj);
 
         Announce announceAux = announcementConsumer.getAnnouncementByURI(uri.toString());
 
@@ -94,7 +101,7 @@ public class AnnounceController {
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if(announce.getPassengers().add(user)){
-            announcementConsumer.edit(announce);
+          /*  announcementConsumer.edit(announce);*/
             redirectAttrs
                     .addFlashAttribute("mensaje", "Te has unido al viaje");
         }else {
@@ -113,7 +120,7 @@ public class AnnounceController {
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         if(announce.getPassengers().remove(user)){
-            announcementConsumer.edit(announce);
+           /* announcementConsumer.edit(announce);*/
             redirectAttrs
                     .addFlashAttribute("mensaje", "Has dejado el viaje");
         }else {
@@ -145,7 +152,7 @@ public class AnnounceController {
         return "editAnnouncement";
     }
     //metodo cuando se modifica el anuncio
-    @PostMapping("/editarAnuncio/confirm")
+    @GetMapping("/editarAnuncio/confirm")
     public String changeAnnouncement(@ModelAttribute Announce announce,@RequestParam("announcementURI") String uri,
                                      Model model, OAuth2AuthenticationToken authenticationToken){
         if (announce.getDescription() == null || announce.getDescription().isEmpty()) {
@@ -154,20 +161,16 @@ public class AnnounceController {
 
         Announce announce1 = announcementConsumer.getAnnouncementByURI(uri);
         announce.add(announce1.getLinks());
-        User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        //no se porque se borra el driver y passeenger
-        announce.setDriver(user);
-        announce.setPassengers(announce1.getPassengers());
-        boolean isPassenger = announce.getPassengers().contains(user);
-        boolean canJoin = !isPassenger && (announce.getSeats() > announce.getPassengers().size());
-        List<BusStop> stops = stopConsumer.getNearby(announce.getDepartureLatitude(), announce.getDepartureLongitude());
-        model.addAttribute("isDriver", true);
-        model.addAttribute("isPassenger", isPassenger);
-        model.addAttribute("announcement", announce);
-        model.addAttribute("canJoin",canJoin);
-        model.addAttribute("paradas", stops);
-        announcementConsumer.edit(announce);
 
-        return "announcementDetails";
+        User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
+
+        //no se porque se borra el driver y passeenger
+
+        ObjectNode obj = joinObject(announce,"driver", user.getLink("self").map(Link::getHref).get());
+        obj = joinObject(announce,"passengers", announce.getLink("passengers").map(Link::getHref).get());
+
+        announcementConsumer.edit(obj,uri);
+        Announce announceAux = announcementConsumer.getAnnouncementByURI(uri.toString());
+        return "redirect:/details?announcementURI=" + announceAux.getLink("self").map(Link::getHref).get();
     }
 }

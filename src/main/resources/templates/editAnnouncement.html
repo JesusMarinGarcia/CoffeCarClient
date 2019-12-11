@@ -100,7 +100,7 @@
 
     </div>
 </form>
-<form th:action="@{editarAnuncio/confirm}" method="post" th:object="${announce}">
+<form th:action="@{editarAnuncio/confirm}" method="get" th:object="${announce}">
 
     <input type="hidden" id="link" value="" th:field="*{imgLink}"/>
     <input type="hidden" name="announcementURI" th:value="${uri}"/>
