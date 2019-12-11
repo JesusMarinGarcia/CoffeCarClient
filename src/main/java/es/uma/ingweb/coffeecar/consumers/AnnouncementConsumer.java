@@ -105,11 +105,11 @@ public class AnnouncementConsumer {
     }
 
     public URI create(JsonNode announcement) {
-        return restTemplate.postForLocation(URL, announcement);
+        return restTemplate.postForLocation(SERVER_URL + "announces", announcement);
     }
 
-    public void delete(Announce announce) {
-        restTemplate.delete(announce.getLink("self").map(Link::getHref).get());
+    public void delete(String uri) {
+        restTemplate.delete(uri);
     }
 
     public void edit(Announce announce) {

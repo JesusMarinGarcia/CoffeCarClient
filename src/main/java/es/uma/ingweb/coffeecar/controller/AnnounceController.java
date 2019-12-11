@@ -50,12 +50,12 @@ public class AnnounceController {
 
         URI uri = announcementConsumer.create(jsonNodeAnnouncement);
 
-        Announce announce1 = announcementConsumer.getAnnouncementByURI(uri.toString());
+        Announce announceAux = announcementConsumer.getAnnouncementByURI(uri.toString());
 
         redirectAttrs
                 .addFlashAttribute("mensaje", "Agregado correctamente");
 
-        return "redirect:/details?announcementURI=" + announce1.getLink("self").map(Link::getHref).get();
+        return "redirect:/details?announcementURI=" + announceAux.getLink("self").map(Link::getHref).get();
     }
 
     @GetMapping("/createAnnouncement")
@@ -123,11 +123,10 @@ public class AnnounceController {
 
     @PostMapping("/announcementDelete")
     public String announcementDelete(
-          @ModelAttribute Announce announcement,
-          OAuth2AuthenticationToken authenticationToken,
-          RedirectAttributes redirectAttrs) {
-        User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        announcementConsumer.delete(announcement);
+            @RequestParam(name = "announcementURI") String uri,
+            RedirectAttributes redirectAttrs) {
+
+        announcementConsumer.delete(uri);
         redirectAttrs
                 .addFlashAttribute("mensaje", "Eliminado correctamente");
         return "redirect:/";

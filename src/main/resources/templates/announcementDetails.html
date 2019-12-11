@@ -59,6 +59,7 @@
     </div>
     <div class="nav container-fluid justify-content-center">
     <form th:action="@{announcementDelete}" method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%" >
+        <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
         <input type="submit" value="Eliminar" class="btn btn-danger btn-lg btn-block">
     </form>
     </div>
