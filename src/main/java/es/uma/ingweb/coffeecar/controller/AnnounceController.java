@@ -82,8 +82,8 @@ public class AnnounceController {
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver = announcement.getDriver()
               .equals(user);
-        boolean isPassenger = announcement.getPassengers().contains(user);
-        boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().size());
+        boolean isPassenger = announcement.getPassengers().getContent().contains(user);
+        boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().getContent().size()) && !isDriver;
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
         model.addAttribute("announcement", announcement);
@@ -104,11 +104,8 @@ public class AnnounceController {
           /*  announcementConsumer.edit(announce);*/
             redirectAttrs
                     .addFlashAttribute("mensaje", "Te has unido al viaje");
-        }else {
-            redirectAttrs
-                    .addFlashAttribute("mensaje", "No has podido unirte o ya estabas unido");
         }
-        return "/";
+        return "redirect:/details?announcementURI=" + announce.getLink("self").map(Link::getHref).get();
     }
 
     @PostMapping("details/left")

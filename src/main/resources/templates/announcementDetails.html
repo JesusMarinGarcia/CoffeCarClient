@@ -53,12 +53,11 @@
 <br>
 <div th:if="${isDriver} == true" style="padding-left: 5%; padding-right: 5%;">
     <div class="nav container-fluid justify-content-center">
-        <form th:action="@{editarAnuncio}">
+        <form th:action="@{editarAnuncio}" style="width: 45%; margin-top: 1%">
             <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
-            <input type="submit" value="Modificar" class="btn btn-danger btn-lg btn-block">
+            <input type="submit" value="Modificar" class="btn btn-success btn-lg btn-block">
         </form>
     </div>
-</div>
     <div class="nav container-fluid justify-content-center">
     <form th:action="@{announcementDelete}" method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%" >
         <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
@@ -67,26 +66,29 @@
     </div>
 </div>
 
-<div th:if="${isPassenger} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
-    <form  method="post" th:action="@{details/left}" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+<div style="padding-left: 5%; padding-right: 5%;">
+<div th:if="${isPassenger} == true" class="nav container-fluid justify-content-center" style="margin-top: 1%">
+    <form  method="post" th:action="@{details/left}" th:object="${announcement}" style="width: 45%">
         <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
         <input type="submit" value="Abandonar viaje" class="btn btn-dark btn-lg btn-block">
     </form>
 </div>
-<div th:if="${canJoin} == true" class="nav container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%; margin-top: 1%">
-    <form  method="post" th:action="@{details/join}" th:object="${announcement}" style="margin-right: 1%; width: 45%">
+<div th:if="${canJoin} == true" class="nav container-fluid justify-content-center" style="margin-top: 1%">
+    <form  method="post" th:action="@{details/join}" th:object="${announcement}" style="width: 45%">
         <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
         <input type="submit" value="Unirse al viaje" class="btn btn-primary btn-lg btn-block">
     </form>
 </div>
+</div>
 
 <div class="nav container-fluid justify-content-center" style="margin-top: 2% ;padding-left: 5%; padding-right: 5%; height: 350px">
-    <img th:src="${announcement.getImgLink()}" src="../static/CoffeeCarLogo.png" alt="..." style="width: 80%; max-height: 100%; border: 2px black">
+    <img th:src="${announcement.getImgLink()}" src="../static/CoffeeCarLogo.png" alt="..." style="max-width: 80%; max-height: 100%; border: 2px black">
 </div>
-<div class="container-fluid text-center" style="padding-left: 5%; padding-right: 5%; margin-top: 2%">
-    <h1>Título</h1>
+<div class="container-fluid text-center" th:object="${announcement}" style="padding-left: 5%; padding-right: 5%; margin-top: 2%">
+    <h1 th:text="*{title}"></h1>
+    <h2 th:text="*{arrival}"></h2>
     <br>
-    <div class="row" th:object="${announcement}">
+    <div class="row">
         <div class="col-sm-4">
             <h5>¿Quién viaja?</h5>
             <h6 class="lbl justify">Conductor</h6>
