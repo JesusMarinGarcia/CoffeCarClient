@@ -93,7 +93,7 @@ public class AnnounceController {
     ){
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        if(announce.getPassengers().add(user)){
+        if(!announce.getPassengers().contains(user) && announce.getPassengers().add(user)){
             announcementConsumer.edit(announce);
             redirectAttrs
                     .addFlashAttribute("mensaje", "Te has unido al viaje");
