@@ -1,8 +1,6 @@
 package es.uma.ingweb.coffeecar.consumers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.nio.sctp.AbstractNotificationHandler;
-import es.uma.ingweb.coffeecar.RestTemplateProxy;
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,13 +10,17 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.client.Traverson;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
@@ -108,13 +110,16 @@ public class AnnouncementConsumer {
         return restTemplate.postForLocation(SERVER_URL + "announces", announcement);
     }
 
-    public void delete(String uri) {
-        restTemplate.delete(uri);
-    }
 
     public void edit(Announce announce) {
-        restTemplate.put(SERVER_URL + "announces", announce, Announce.class);
+
+        restTemplate.put(announce.getLink("self").map(Link::getHref).get(), new HttpEntity(announce), Announce.class
+                , announce.getId());
     }
+    public void delete(String uri) {
+          restTemplate.delete(uri);
+    }
+
 
     private static ParameterizedTypeReference<PagedModel<Announce>> getParameterizedTypeReference() {
         return new ParameterizedTypeReference<>() {

@@ -53,10 +53,12 @@
 <br>
 <div th:if="${isDriver} == true" style="padding-left: 5%; padding-right: 5%;">
     <div class="nav container-fluid justify-content-center">
-    <form  method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%">
-        <input type="submit" value="Editar" class="btn btn-success btn-lg btn-block">
-    </form>
+        <form th:action="@{editarAnuncio}">
+            <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
+            <input type="submit" value="Modificar" class="btn btn-danger btn-lg btn-block">
+        </form>
     </div>
+</div>
     <div class="nav container-fluid justify-content-center">
     <form th:action="@{announcementDelete}" method="post" th:object="${announcement}" style="width: 45%; margin-top: 1%" >
         <input type="hidden" name="announcementURI" th:value="${announcement.getLink('self').get().getHref()}">
