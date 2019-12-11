@@ -94,7 +94,7 @@
             <h6 class="lbl justify">Conductor</h6>
             <p class="justify" th:text="*{driver.getName()}"></p>
             <h6 class="lbl justify">Asientos ocupados/total</h6>
-            <p class="justify lbl" th:text="*{passengers.getContent().size() + '/' + seats}"></p>
+            <p class="justify lbl" th:text="*{passengers.size() + '/' + seats}"></p>
             <button class="btn btn-secondary btn-sm" onclick="mostarOcultarPasajeros()" id="mostrar">Mostrar pasajeros
             </button>
         </div>

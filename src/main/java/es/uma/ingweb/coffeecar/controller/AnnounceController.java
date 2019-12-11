@@ -82,6 +82,7 @@ public class AnnounceController {
               .equals(user);
         boolean isPassenger = announcement.getPassengers().contains(user);
         boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().size()) && !isDriver;
+        boolean canLeft = !isDriver && isPassenger;
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
         model.addAttribute("announcement", announcement);
@@ -98,7 +99,7 @@ public class AnnounceController {
     ){
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        List<User> passengers = announce.getPassengers();
+        List<User> passengers = (List<User>) announce.getPassengers();
         if(!passengers.contains(user) && passengers.add(user)){
             ObjectMapper objectMapper = new ObjectMapper();
             ArrayNode arrayNode = objectMapper.valueToTree(passengers);
@@ -120,11 +121,11 @@ public class AnnounceController {
     ){
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        Collection<User> newPassengers = new HashSet<>(announce.getPassengers().getContent());
+        List<User> newPassengers = announce.getPassengers();
         boolean successfulRemoval = newPassengers.remove(user);
         if(successfulRemoval){
-            announce.setPassengers(new CollectionModel<>(newPassengers));
-            announcementConsumer.edit(announce);
+            announce.setPassengers(newPassengers);
+            //announcementConsumer.edit(announce);
             redirectAttrs
                     .addFlashAttribute("mensaje", "Has dejado el viaje");
         }else {
@@ -169,7 +170,7 @@ public class AnnounceController {
         //no se porque se borra el driver y passeenger
         announce.setDriver(user);
         announce.setPassengers(announce1.getPassengers());
-        boolean isPassenger = announce.getPassengers()!announce.getPassengers().contains(user);
+        boolean isPassenger = announce.getPassengers().contains(user);
         boolean canJoin = !isPassenger && (announce.getSeats() > announce.getPassengers().size());
         List<BusStop> stops = stopConsumer.getNearby(announce.getDepartureLatitude(), announce.getDepartureLongitude());
         model.addAttribute("isDriver", true);
