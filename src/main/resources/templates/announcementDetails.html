@@ -143,10 +143,18 @@
         .setView([lati,longi], 12)
         .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
+    L.marker([lati, longi], {
+        icon: L.mapbox.marker.icon({
+            'marker-size': 'large',
+            'marker-symbol': 'car',
+            'marker-color': '#3ab3da'
+        })
+    }).addTo(map);
+
     var stops = /*[[${paradas}]]*/ [];
 
     stops.forEach(function (parada, index) {
-        L.marker([parada.lat, parada.lon], {
+        var marker = L.marker([parada.lat, parada.lon], {
             icon: L.mapbox.marker.icon({
                 'marker-size': 'small',
                 'marker-symbol': 'bus',
@@ -155,14 +163,6 @@
         }).addTo(map);
         marker.bindPopup("<b>Linea " +  parada.codLinea  + "</b><br>Parada " + parada.codParada)
     })
-
-    L.marker([lati, longi], {
-        icon: L.mapbox.marker.icon({
-            'marker-size': 'large',
-            'marker-symbol': 'car',
-            'marker-color': '#3ab3da'
-        })
-    }).addTo(map);
 
     /*L.marker([36.75016, -4.42034], {
         icon: L.mapbox.marker.icon({

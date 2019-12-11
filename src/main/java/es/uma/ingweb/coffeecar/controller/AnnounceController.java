@@ -117,20 +117,15 @@ public class AnnounceController {
         return "/";
     }
 
-    @GetMapping("/announcementDelete")
+    @PostMapping("/announcementDelete")
     public String announcementDelete(
           @ModelAttribute Announce announcement,
           OAuth2AuthenticationToken authenticationToken,
           RedirectAttributes redirectAttrs) {
         User driver = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        if (announcement.getDriver().equals(driver)) {
-            announcementConsumer.delete(announcement);
-            redirectAttrs
-                  .addFlashAttribute("mensaje", "Eliminado correctamente");
-        } else {
-            redirectAttrs
-                  .addFlashAttribute("mensaje", "No tienes permiso para esta acción");
-        }
+        announcementConsumer.delete(announcement);
+        redirectAttrs
+                .addFlashAttribute("mensaje", "Eliminado correctamente");
         return "redirect:/";
     }
 }
