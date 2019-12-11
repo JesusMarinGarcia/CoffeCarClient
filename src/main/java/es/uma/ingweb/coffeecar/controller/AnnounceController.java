@@ -1,6 +1,7 @@
 package es.uma.ingweb.coffeecar.controller;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
@@ -17,7 +18,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +79,8 @@ public class AnnounceController {
         Announce announcement = announcementConsumer.getAnnouncementByURI(uri);
         List<BusStop> stops = stopConsumer
               .getNearby(announcement.getDepartureLatitude(), announcement.getDepartureLongitude());
+        List<BusStop> stopsArrival = stopConsumer
+                .getNearby(announcement.getArrivalLatitude(), announcement.getArrivalLongitude());
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver = announcement.getDriver()
               .equals(user);
@@ -85,6 +91,7 @@ public class AnnounceController {
         model.addAttribute("announcement", announcement);
         model.addAttribute("canJoin",canJoin);
         model.addAttribute("paradas", stops);
+        model.addAttribute("paradasLlegada", stopsArrival);
         return "announcementDetails";
     }
 
@@ -93,10 +100,11 @@ public class AnnounceController {
             @RequestParam(name = "announcementURI") String uri,
             OAuth2AuthenticationToken authenticationToken,
             RedirectAttributes redirectAttrs
-    ){
+    ) throws IOException {
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        if(!announce.getPassengers().getContent().contains(user) && announce.getPassengers().getContent().add(user)){
+        List<User> passengers = new ArrayList<>(announce.getPassengers().getContent());
+        if(!passengers.contains(user) && passengers.add(user)){
             announcementConsumer.edit(announce);
             redirectAttrs
                     .addFlashAttribute("mensaje", "Te has unido al viaje");
@@ -116,7 +124,7 @@ public class AnnounceController {
         boolean successfulRemoval = newPassengers.remove(user);
         if(successfulRemoval){
             announce.setPassengers(new CollectionModel<>(newPassengers));
-            announcementConsumer.edit(announce);
+            //announcementConsumer.edit(announce);
             redirectAttrs
                     .addFlashAttribute("mensaje", "Has dejado el viaje");
         }else {
@@ -169,7 +177,7 @@ public class AnnounceController {
         model.addAttribute("announcement", announce);
         model.addAttribute("canJoin",canJoin);
         model.addAttribute("paradas", stops);
-        announcementConsumer.edit(announce);
+        //announcementConsumer.edit(announce);
 
         return "announcementDetails";
     }

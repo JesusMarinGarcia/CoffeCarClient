@@ -80,10 +80,6 @@
     </form>
 </div>
 </div>
-
-<div class="nav container-fluid justify-content-center" style="margin-top: 2% ;padding-left: 5%; padding-right: 5%; height: 350px">
-    <img th:src="${announcement.getImgLink()}" src="../static/CoffeeCarLogo.png" alt="..." style="max-width: 80%; max-height: 100%; border: 2px black">
-</div>
 <div class="container-fluid text-center" th:object="${announcement}" style="padding-left: 5%; padding-right: 5%; margin-top: 2%">
     <h1 th:text="*{title}"></h1>
     <h2 th:text="*{arrival}"></h2>
@@ -140,7 +136,6 @@
     <div id="mapDes" style="width: 45%; height: 300px; margin-left: 20px; border: 4px solid indianred"></div>
 </div>
 </div>
-<br>
 <script th:inline="javascript">
     var lati = /*[[${announcement.departureLatitude}]]*/ 1.1;
     var longi = /*[[${announcement.departureLongitude}]]*/ 1.1;
@@ -184,41 +179,41 @@
     var lo = /*[[${announcement.arrivalLongitude}]]*/ 1.1;
     var la = /*[[${announcement.arrivalLatitude}]]*/ 1.1;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
-    var mapDes = new mapboxgl.Map({
-        container: 'mapDes',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [lo, la],
-        zoom: 11
-    });
+    L.mapbox.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
+    var mapDes = L.mapbox.map('mapDes')
+        .setView([la,lo], 12)
+        .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
-    mapDes.addControl(new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl
-    }));
+    L.marker([la, lo], {
+        icon: L.mapbox.marker.icon({
+            'marker-size': 'large',
+            'marker-symbol': 'car',
+            'marker-color': '#3ab3da'
+        })
+    }).addTo(mapDes);
 
-    mapDes.addControl(new mapboxgl.NavigationControl());
+    var stopsArrival = /*[[${paradasLlegada}]]*/ [];
 
-    mapDes.addControl(new mapboxgl.GeolocateControl({
-        positionOptions: {
-            enableHighAccuracy: true
-        },
-        trackUserLocation: true
-    }));
-
-
-
-
-    var markerDes = new mapboxgl.Marker({
+    stopsArrival.forEach(function (paradaLlegada, index) {
+        var markerDes = L.marker([paradaLlegada.lat, paradaLlegada.lon], {
+            icon: L.mapbox.marker.icon({
+                'marker-size': 'small',
+                'marker-symbol': 'bus',
+                'marker-color': '#FF3633'
+            })
+        }).addTo(mapDes);
+        markerDes.bindPopup("<b>Linea " +  paradaLlegada.codLinea  + "</b><br>Parada " + paradaLlegada.codParada)
     })
-        .setLngLat([lo,la])
-        .addTo(mapDes);
-
 
 
 </script>
 
+<div class="nav container-fluid justify-content-center" style="margin-top: 2% ;padding-left: 5%; padding-right: 5%; height: 350px">
+    <img th:src="${announcement.getImgLink()}" th:alt="@{CoffeeCarLogo.png}" src="../static/CoffeeCarLogo.png" alt="..." style="max-width: 80%; max-height: 100%; border: 2px black">
+</div>
 
+<br>
+<br>
 
 
 </body>
