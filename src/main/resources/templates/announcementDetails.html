@@ -142,7 +142,7 @@
 
     L.mapbox.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
     var map = L.mapbox.map('map')
-        .setView([lati,longi], 12)
+        .setView([lati,longi], 15)
         .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
     L.marker([lati, longi], {
@@ -160,7 +160,7 @@
             icon: L.mapbox.marker.icon({
                 'marker-size': 'medium',
                 'marker-symbol': 'marker',
-                'marker-color': '#22ff8e'
+                'marker-color': '#4eff73'
             })
         }).addTo(map);
         marker.bindPopup("<b>Lineas:<br>" +  parada.lineas  + "</b><br>Parada " + parada.codParada)
@@ -187,7 +187,7 @@
     var la = /*[[${announcement.arrivalLatitude}]]*/ 1.1;
     L.mapbox.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
     var mapDes = L.mapbox.map('mapDes')
-        .setView([la,lo], 12)
+        .setView([la,lo], 15)
         .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
     L.marker([la, lo], {
         icon: L.mapbox.marker.icon({
