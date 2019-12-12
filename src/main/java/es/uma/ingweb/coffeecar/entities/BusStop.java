@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,4 +17,6 @@ public class BusStop {
     private float codLinea;
     private float lat;
     private float lon;
+    private String lineas;
+
 }

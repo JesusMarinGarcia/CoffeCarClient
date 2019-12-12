@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.uma.ingweb.coffeecar.consumers.AnnouncementConsumer;
+import es.uma.ingweb.coffeecar.consumers.BusConsumer;
 import es.uma.ingweb.coffeecar.consumers.StopConsumer;
 import es.uma.ingweb.coffeecar.consumers.UserConsumer;
 import es.uma.ingweb.coffeecar.entities.Announce;
+import es.uma.ingweb.coffeecar.entities.Bus;
 import es.uma.ingweb.coffeecar.entities.BusStop;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.hateoas.CollectionModel;
@@ -32,11 +34,13 @@ public class AnnounceController {
     private final AnnouncementConsumer announcementConsumer;
     private final UserConsumer userConsumer;
     private final StopConsumer stopConsumer;
+    private final BusConsumer busConsumer;
 
-    public AnnounceController(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer, StopConsumer stopConsumer) {
+    public AnnounceController(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer, StopConsumer stopConsumer, BusConsumer busConsumer) {
         this.announcementConsumer = announcementConsumer;
         this.userConsumer = userConsumer;
         this.stopConsumer = stopConsumer;
+        this.busConsumer = busConsumer;
     }
 
     @PostMapping("createAnnouncement/confirm")
@@ -76,6 +80,8 @@ public class AnnounceController {
               .getNearby(announcement.getDepartureLatitude(), announcement.getDepartureLongitude());
         List<BusStop> stopsArrival = stopConsumer
                 .getNearby(announcement.getArrivalLatitude(), announcement.getArrivalLongitude());
+
+        List<Bus> buses = busConsumer.getAll() ;
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver;
         boolean isPassenger = announcement.getPassengers().contains(user);
@@ -94,6 +100,7 @@ public class AnnounceController {
         model.addAttribute("announcement", announcement);
         model.addAttribute("canJoin",canJoin);
         model.addAttribute("paradas", stops);
+        model.addAttribute("buses",buses);
         model.addAttribute("paradasLlegada", stopsArrival);
         return "announcementDetails";
     }
