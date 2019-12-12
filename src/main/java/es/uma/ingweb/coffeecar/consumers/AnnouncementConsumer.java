@@ -1,6 +1,9 @@
 package es.uma.ingweb.coffeecar.consumers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,11 +34,13 @@ public class AnnouncementConsumer {
 
     private final RestTemplate restTemplate;
     private final Traverson traverson;
+    private final UserConsumer userConsumer;
 
 
-    public AnnouncementConsumer(RestTemplate restTemplate, Traverson traverson) {
+    public AnnouncementConsumer(RestTemplate restTemplate, Traverson traverson,UserConsumer userConsumer) {
         this.restTemplate = restTemplate;
         this.traverson = traverson;
+        this.userConsumer = userConsumer;
     }
 
     public Announce getAnnouncementByURI(String uri) {
@@ -80,7 +85,7 @@ public class AnnouncementConsumer {
     private Announce setParams(Announce announcement){
         String driver = announcement.getLink("driver").map(Link::getHref).get();
         String passengers = announcement.getLink("passengers").map(Link::getHref).get();
-        announcement.setDriver(getDriver(URI.create(driver)));
+        announcement.setDriver(userConsumer.getByEmail(getDriver(URI.create(driver)).getEmail()));
         announcement.setPassengers(getPassengers(URI.create(passengers)));
 
         return announcement;
@@ -105,12 +110,12 @@ public class AnnouncementConsumer {
                 .toObject(getUserEntityModelParameterizedTypeReference())).getContent();
     }
 
-    public URI create(JsonNode announcement) {
-        return restTemplate.postForLocation(SERVER_URL + "announces", announcement);
+    public URI create(JsonNode announce) {
+        return restTemplate.postForLocation(SERVER_URL + "announces", announce);
     }
 
-    public void edit(JsonNode announce) {
-        restTemplate.put(SERVER_URL + "announces",announce);
+    public void edit(String uri, JsonNode announce) {
+        restTemplate.exchange(uri, HttpMethod.PUT, null, getAnnounceEntityModelParameterizedTypeReference(),announce);
     }
     public void delete(String uri) {
           restTemplate.delete(uri);

@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 
 @Controller
@@ -49,11 +50,7 @@ public class AnnounceController {
             announce.setDescription("No hay descripción");
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announce);
-        jsonNodeAnnouncement.put("driver", driver.getLink("self").map(Link::getHref).get());
-
-        URI uri = announcementConsumer.create(jsonNodeAnnouncement);
+        URI uri = create(announce, driver);
 
         Announce announceAux = announcementConsumer.getAnnouncementByURI(uri.toString());
 
@@ -99,18 +96,42 @@ public class AnnounceController {
     ){
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        List<User> passengers = (List<User>) announce.getPassengers();
-        if(!passengers.contains(user) && passengers.add(user)){
-            ObjectMapper objectMapper = new ObjectMapper();
-            ArrayNode arrayNode = objectMapper.valueToTree(passengers);
-            ObjectNode passengersNode = objectMapper.valueToTree(announce);
-            passengersNode.putArray("passengers").addAll(arrayNode);
-            JsonNode result = objectMapper.createObjectNode().set("passengers", passengersNode);
-            announcementConsumer.edit(result);
+        List<User> passengers = announce.getPassengers();
+        if(!passengers.contains(user)) {
+            passengers.add(user);
+            edit(announce);
+
             redirectAttrs
                     .addFlashAttribute("mensaje", "Te has unido al viaje");
         }
         return "redirect:/details?announcementURI=" + announce.getLink("self").map(Link::getHref).get();
+    }
+
+    private void edit(Announce announce){
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ObjectNode announceNode = objectMapper.valueToTree(announce);
+        ArrayNode passengerNode = announceNode.putArray("passengers");
+        announce.getPassengers()
+                .forEach(
+                        user ->
+                                passengerNode
+                                        .add(user
+                                                .getLink("self").map(Link::getHref).get()));
+
+        announceNode.put("driver", announce.getDriver().getLink("self").map(Link::getHref).get());
+
+        String uri = announce.getLink("self").map(Link::getHref).get();
+
+        announcementConsumer.edit(uri, announceNode);
+    }
+
+    private URI create(Announce announce, User driver){
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode jsonNodeAnnouncement = objectMapper.valueToTree(announce);
+        jsonNodeAnnouncement.put("driver", driver.getLink("self").map(Link::getHref).get());
+
+        return announcementConsumer.create(jsonNodeAnnouncement);
     }
 
     @PostMapping("details/left")
