@@ -74,17 +74,19 @@ public class AnnounceController {
         Announce announcement = announcementConsumer.getAnnouncementByURI(uri);
         List<BusStop> stops = stopConsumer
               .getNearby(announcement.getDepartureLatitude(), announcement.getDepartureLongitude());
+        List<BusStop> stopsArrival = stopConsumer
+                .getNearby(announcement.getArrivalLatitude(), announcement.getArrivalLongitude());
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         boolean isDriver = announcement.getDriver()
               .equals(user);
         boolean isPassenger = announcement.getPassengers().contains(user);
         boolean canJoin = !isPassenger && (announcement.getSeats() > announcement.getPassengers().size()) && !isDriver;
-        boolean canLeft = !isDriver && isPassenger;
         model.addAttribute("isDriver", isDriver);
         model.addAttribute("isPassenger", isPassenger);
         model.addAttribute("announcement", announcement);
         model.addAttribute("canJoin",canJoin);
         model.addAttribute("paradas", stops);
+        model.addAttribute("paradasLlegada", stopsArrival);
         return "announcementDetails";
     }
 
