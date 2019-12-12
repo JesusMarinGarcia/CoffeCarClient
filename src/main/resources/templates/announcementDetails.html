@@ -193,9 +193,9 @@
     stopsArrival.forEach(function (paradaLlegada, index) {
         var markerDes = L.marker([paradaLlegada.lat, paradaLlegada.lon], {
             icon: L.mapbox.marker.icon({
-                'marker-size': 'small',
-                'marker-symbol': 'bus',
-                'marker-color': '#FF3633'
+                'marker-size': 'medium',
+                'marker-symbol': 'marker',
+                'marker-color': '#4eff73'
             })
         }).addTo(mapDes);
         markerDes.bindPopup("<b>Linea " +  paradaLlegada.codLinea  + "</b><br>Parada " + paradaLlegada.codParada)
