@@ -26,11 +26,9 @@ public class BusConsumer {
     }
 
     public List<Bus> getAll() {
-        final ResponseEntity<PagedModel<Bus>> busResponse = restTemplate
-                .exchange(SERVER_URL+ "buses", HttpMethod.GET, null,
-                        getParameterizedTypeReference()
-                );
-        return new ArrayList<>(Objects.requireNonNull(busResponse.getBody()).getContent());
+        final Bus[] busResponse = restTemplate
+                .getForObject(SERVER_URL+ "buses", Bus[].class);
+        return Arrays.asList(busResponse);
     }
 
     public List<Bus> getByLine(int codLine) {

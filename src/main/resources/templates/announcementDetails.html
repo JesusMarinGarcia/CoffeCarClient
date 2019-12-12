@@ -158,21 +158,28 @@
     stops.forEach(function (parada, index) {
         var marker = L.marker([parada.lat, parada.lon], {
             icon: L.mapbox.marker.icon({
+                'marker-size': 'medium',
+                'marker-symbol': 'marker',
+                'marker-color': '#22ff8e'
+            })
+        }).addTo(map);
+        marker.bindPopup("<b>Lineas:<br>" +  parada.lineas  + "</b><br>Parada " + parada.codParada)
+    })
+
+    var stops = /*[[${buses}]]*/ [];
+
+    stops.forEach(function (bus, index) {
+        var markerB = L.marker([bus.lat, bus.lon], {
+            icon: L.mapbox.marker.icon({
                 'marker-size': 'small',
                 'marker-symbol': 'bus',
                 'marker-color': '#FF3633'
             })
         }).addTo(map);
-        marker.bindPopup("<b>Linea " +  parada.codLinea  + "</b><br>Parada " + parada.codParada)
+        markerB.bindPopup("<b>Lineas:<br>" +  bus.codLinea)
     })
 
-    /*L.marker([36.75016, -4.42034], {
-        icon: L.mapbox.marker.icon({
-            'marker-size': 'small',
-            'marker-symbol': 'bus',
-            'marker-color': '#FF3633'
-        })
-    }).addTo(map);*/
+
 </script>
 
 <script th:inline="javascript">
