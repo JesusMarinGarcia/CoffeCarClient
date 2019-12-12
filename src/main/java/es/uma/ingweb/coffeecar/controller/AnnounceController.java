@@ -100,7 +100,7 @@ public class AnnounceController {
         String announceURI = uri;
         if(!passengers.contains(user)) {
             passengers.add(user);
-            announceURI = edit(announce).toString();
+            announceURI = editOnlyPassengers(announce).toString();
 
             redirectAttrs
                     .addFlashAttribute("mensaje", "Te has unido al viaje");
@@ -108,7 +108,7 @@ public class AnnounceController {
         return "redirect:/details?announcementURI=" + announceURI;
     }
 
-    private URI edit(Announce announce){
+    private URI editOnlyPassengers(Announce announce){
         ObjectMapper objectMapper = new ObjectMapper();
 
         ObjectNode announceNode = objectMapper.valueToTree(announce);
@@ -125,6 +125,9 @@ public class AnnounceController {
         String uri = announce.getLink("self").map(Link::getHref).get();
 
         return announcementConsumer.edit(uri, announceNode);
+    }
+    private void edit(Announce announce){
+        announcementConsumer.edit(announce);
     }
 
     private URI create(Announce announce, User driver){
@@ -148,7 +151,7 @@ public class AnnounceController {
         String announceURI = uri;
         if(successfulRemoval){
             announce.setPassengers(newPassengers);
-            announceURI = edit(announce).toString();
+            announceURI = editOnlyPassengers(announce).toString();
             redirectAttrs
                     .addFlashAttribute("mensaje", "Has dejado el viaje");
         }else {
@@ -179,30 +182,19 @@ public class AnnounceController {
             model.addAttribute("uri",uri);
         return "editAnnouncement";
     }
-    //metodo cuando se modifica el anuncio
+
     @PostMapping("/editarAnuncio/confirm")
     public String changeAnnouncement(@ModelAttribute Announce announce,@RequestParam("announcementURI") String uri,
                                      Model model, OAuth2AuthenticationToken authenticationToken){
         if (announce.getDescription() == null || announce.getDescription().isEmpty()) {
             announce.setDescription("No hay descripción");
         }
+        Announce announceAux = announcementConsumer.getAnnouncementByURI(uri);
+        announce.setDriver(announceAux.getDriver());
+        announce.setPassengers(announceAux.getPassengers());
+        announce.add(announceAux.getLinks());
+        edit(announce);
 
-        Announce announce1 = announcementConsumer.getAnnouncementByURI(uri);
-        announce.add(announce1.getLinks());
-        User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
-        //no se porque se borra el driver y passeenger
-        announce.setDriver(user);
-        announce.setPassengers(announce1.getPassengers());
-        boolean isPassenger = announce.getPassengers().contains(user);
-        boolean canJoin = !isPassenger && (announce.getSeats() > announce.getPassengers().size());
-        List<BusStop> stops = stopConsumer.getNearby(announce.getDepartureLatitude(), announce.getDepartureLongitude());
-        model.addAttribute("isDriver", true);
-        model.addAttribute("isPassenger", isPassenger);
-        model.addAttribute("announcement", announce);
-        model.addAttribute("canJoin",canJoin);
-        model.addAttribute("paradas", stops);
-        //announcementConsumer.edit(announce);
-
-        return "announcementDetails";
+        return "redirect:/details?announcementURI=" + uri;
     }
 }

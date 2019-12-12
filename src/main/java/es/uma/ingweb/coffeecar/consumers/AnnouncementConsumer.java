@@ -118,6 +118,11 @@ public class AnnouncementConsumer {
         delete(uri);
         return create(announce);
     }
+
+    public void edit(Announce announce){
+        restTemplate.put(announce.getLink("self").map(Link::getHref).get(), announce);
+    }
+
     public void delete(String uri) {
           restTemplate.delete(uri);
     }
