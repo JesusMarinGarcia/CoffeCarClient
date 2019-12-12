@@ -1,111 +1,149 @@
 package es.uma.ingweb.coffeecar.consumers;
 
-import es.uma.ingweb.coffeecar.entities.Announcement;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import es.uma.ingweb.coffeecar.entities.Announce;
 import es.uma.ingweb.coffeecar.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.client.Traverson;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 
 @Service
 public class AnnouncementConsumer {
-    private static final String URL ="http://localhost:8080/announced";
-    private static final String GET_ALL_ANNOUNCEMENTS_URL = "http://localhost:8080/announced/search/findAll";
-    private static final String GET_ANNOUNCEMENTS_BY_DRIVER_URL = "http://localhost:8080/announced/search/findAnnouncesByDriver?user={user}";
-    private static final String  GET_ANNOUNCEMENTS_BY_PASSENGER_URL = "http://localhost:8080/announced/search/findAnnouncesByPassengers?user={user}";
-    private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL = "http://localhost:8080/announced/search/findAnnouncesByArrivalDate?arrivalDate={arrivalDate}";
-    private static final String GET_ANNOUNCEMENTS_BY_ARRIVAL_URL = "http://localhost:8080/announced/search/findAnnouncesByArrival?arrival={arrival}";
+    @Value("${server.url}")
+    private String SERVER_URL;
 
     private final RestTemplate restTemplate;
+    private final Traverson traverson;
+    private final UserConsumer userConsumer;
 
-    public AnnouncementConsumer(RestTemplate restTemplate) {
+
+    public AnnouncementConsumer(RestTemplate restTemplate, Traverson traverson,UserConsumer userConsumer) {
         this.restTemplate = restTemplate;
+        this.traverson = traverson;
+        this.userConsumer = userConsumer;
     }
 
-    public List<Announcement> getAvailableAnnouncements(User user){
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-                restTemplate.exchange(
-                        URL,
-                        HttpMethod.GET,
-                        null,
-                        getParameterizedTypeReference()
-                );
-        List<Announcement> allTrips = new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
-        allTrips.removeAll(getMyTrips(user));
-        return allTrips;
-    }
-    public List<Announcement> getByDriver(User user){
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-                restTemplate.exchange(
-                        GET_ANNOUNCEMENTS_BY_DRIVER_URL,
-                        HttpMethod.GET,
-                        null,
-                        getParameterizedTypeReference(),
-                        user
-                );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
-    }
-    public List<Announcement> getByPassenger(User user){
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-                restTemplate.exchange(
-                        GET_ANNOUNCEMENTS_BY_PASSENGER_URL,
-                        HttpMethod.GET,
-                        null,
-                        getParameterizedTypeReference(),
-                        user
-                );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
-    }
-    public List<Announcement> getMyTrips(User user){
-        List<Announcement> allMyTrips = getByDriver(user);
-        allMyTrips.addAll(getByPassenger(user));
-        return sortByDepartureDate(allMyTrips);
+    public Announce getAnnouncementByURI(String uri) {
+        ResponseEntity<EntityModel<Announce>> announcementResponseEntity = restTemplate
+              .exchange(
+                    uri,
+                    HttpMethod.GET,
+                    null,
+                      getAnnounceEntityModelParameterizedTypeReference()
+              );
 
-    }
-    private List<Announcement> sortByDepartureDate(List<Announcement> announcementList){
-        announcementList.sort(Comparator.comparing(Announcement::getDepartureTime));
-        return announcementList;
-    }
-    public List<Announcement> getByArrivalDate(LocalDateTime arrivalDate){
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-                restTemplate.exchange(
-                        GET_ANNOUNCEMENTS_BY_ARRIVAL_DATE_URL,
-                        HttpMethod.GET,
-                        null,
-                        getParameterizedTypeReference(),
-                        arrivalDate
-                );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
-    }
-    public List<Announcement> getByArrival(String arrival){
-        final ResponseEntity<PagedModel<Announcement>> announcementResponse =
-                restTemplate.exchange(
-                        GET_ANNOUNCEMENTS_BY_ARRIVAL_URL,
-                        HttpMethod.GET,
-                        null,
-                        getParameterizedTypeReference(),
-                        arrival
-                );
-        return new ArrayList<>(Objects.requireNonNull(announcementResponse.getBody()).getContent());
+        Announce announce = Objects.requireNonNull(announcementResponseEntity.getBody()).getContent();
+        announce.add(announcementResponseEntity.getBody().getLinks());
+
+        return setParams(announce);
     }
 
-    public void create(Announcement announcement) {
-        restTemplate.postForEntity(URL, announcement, Announcement.class);
-    }
-    public void delete(Announcement announcement) {
-        restTemplate.delete(URL, announcement, Announcement.class);
-    }
-    public void edit(Announcement announcement){
-        restTemplate.put(URL, announcement, Announcement.class);
+    public List<Announce> getAvailableAnnouncements(String email) {
+        Traverson.TraversalBuilder traversalBuilder = traverson
+                .follow("announces")
+                .follow("search")
+                .follow("findAvailableAnnounces")
+                .withTemplateParameters(Map.of("email", email));
+
+        PagedModel<Announce> announces = traversalBuilder.toObject(getParameterizedTypeReference());
+
+        return setParams(new ArrayList<>(Objects.requireNonNull(announces).getContent()));
     }
 
-    private static ParameterizedTypeReference<PagedModel<Announcement>> getParameterizedTypeReference() {
-        return new ParameterizedTypeReference<>() {};
+    public List<Announce> getMyTrips(String email) {
+        Traverson.TraversalBuilder traversalBuilder = traverson
+                .follow("announces")
+                .follow("search")
+                .follow("findUserTrips")
+                .withTemplateParameters(Map.of("email", email));
+
+        CollectionModel<Announce> announces = traversalBuilder.toObject(getParameterizedTypeReference());
+
+        return setParams(new ArrayList<>(Objects.requireNonNull(announces).getContent()));
+    }
+
+    private Announce setParams(Announce announcement){
+        String driver = announcement.getLink("driver").map(Link::getHref).get();
+        String passengers = announcement.getLink("passengers").map(Link::getHref).get();
+        announcement.setDriver(userConsumer.getByEmail(getDriver(URI.create(driver)).getEmail()));
+        announcement.setPassengers(getPassengers(URI.create(passengers)));
+
+        return announcement;
+    }
+
+    public List<User> getPassengers(URI uri){
+        return new ArrayList<>(Objects.requireNonNull(new Traverson(uri, HAL_JSON)
+                .follow("self")
+                .toObject(getUserCollectionType())).getContent());
+    }
+
+    private List<Announce> setParams(List<Announce> announcements){
+        List<Announce> result = new ArrayList<>();
+        announcements.forEach(announce -> result.add(setParams(announce)));
+
+        return result;
+    }
+
+    public User getDriver(URI uri){
+        return Objects.requireNonNull(new Traverson(uri, HAL_JSON)
+                .follow("self")
+                .toObject(getUserEntityModelParameterizedTypeReference())).getContent();
+    }
+
+    public URI create(JsonNode announce) {
+        return restTemplate.postForLocation(SERVER_URL + "announces", announce);
+    }
+
+    public URI edit(String uri, JsonNode announce) {
+        delete(uri);
+        return create(announce);
+    }
+
+    public void edit(Announce announce){
+        restTemplate.put(announce.getLink("self").map(Link::getHref).get(), announce);
+    }
+
+    public void delete(String uri) {
+          restTemplate.delete(uri);
+    }
+
+    private ParameterizedTypeReference<CollectionModel<User>> getUserCollectionType() {
+        return new ParameterizedTypeReference<CollectionModel<User>>() {
+        };
+    }
+
+    private static ParameterizedTypeReference<PagedModel<Announce>> getParameterizedTypeReference() {
+        return new ParameterizedTypeReference<>() {
+        };
+    }
+
+    private static ParameterizedTypeReference<EntityModel<Announce>> getAnnounceEntityModelParameterizedTypeReference() {
+        return new ParameterizedTypeReference<>() {
+        };
+    }
+
+    private static ParameterizedTypeReference<EntityModel<User>> getUserEntityModelParameterizedTypeReference() {
+        return new ParameterizedTypeReference<>() {
+        };
     }
 }

@@ -8,38 +8,41 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.Optional;
+import java.util.Objects;
 
 @Controller
 public class HomePageController {
-    private final AnnouncementConsumer announcementConsumer;
     private final UserConsumer userConsumer;
+    private final AnnouncementConsumer announcementConsumer;
 
     public HomePageController(AnnouncementConsumer announcementConsumer, UserConsumer userConsumer) {
-        this.announcementConsumer = announcementConsumer;
         this.userConsumer = userConsumer;
+        this.announcementConsumer = announcementConsumer;
     }
 
     @GetMapping("/")
     public String home(OAuth2AuthenticationToken authenticationToken, Model model) {
         String email = authenticationToken.getPrincipal().getAttribute("email");
         String name = authenticationToken.getPrincipal().getAttribute("name");
-        User user = userConsumer.getByEmail(email);
-        if(user==null || user.getEmail()==null)
-            user = createUser(email,name);
 
-        model.addAttribute("availableAnnouncements", announcementConsumer.getAvailableAnnouncements(user));
-        model.addAttribute("myTrips", announcementConsumer.getMyTrips(user));
+        createIfDoesntExist(email, name);
+
+        model.addAttribute("announcementsAvailable", announcementConsumer.getAvailableAnnouncements(email));
+        model.addAttribute("myTrips", announcementConsumer.getMyTrips(email));
 
         return "home";
+    }
+
+    private void createIfDoesntExist(String email, String name) {
+        userConsumer.optionalGetByEmail(email)
+              .filter(u -> Objects.nonNull(u.getEmail()))
+              .orElseGet(() -> createUser(email, name));
     }
 
     private User createUser(String email, String name) {
         User user = User.builder()
               .email(email)
               .name(name)
-              .joinedAnnouncements(null)
-              .ownedAnnouncements(null)
               .build();
         userConsumer.create(user);
         return user;

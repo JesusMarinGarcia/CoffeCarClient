@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "server.url",
+      "type": "java.lang.String",
+      "description": "The server this client points to."
+    }
+  ]
+}

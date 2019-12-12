@@ -1,46 +1,46 @@
 package es.uma.ingweb.coffeecar.consumers;
 
-import es.uma.ingweb.coffeecar.entities.Bus;
 import es.uma.ingweb.coffeecar.entities.BusStop;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class StopConsumer {
-    private static final String GET_ALL_STOP= "http://localhost:8080/getStops/all";
-    private static final String GET_ALL_NEARBY_STOPS = "http://localhost:8080/getStops/near?";
+    @Value("${server.url}")
+    private String SERVER_URL;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
+
+    public StopConsumer(RestTemplate restTemplate) {
+        this.restTemplate = new RestTemplate();
+    }
 
     public List<BusStop> getAll() {
-        final ResponseEntity<PagedModel<BusStop>> stopResponse = restTemplate
-                .exchange(GET_ALL_STOP, HttpMethod.GET, null,
-                        getParameterizedTypeReference()
-                );
-        return new ArrayList<>(Objects.requireNonNull(stopResponse.getBody()).getContent());
+        final CollectionModel<BusStop> stopResponse = restTemplate
+              .exchange(SERVER_URL+ "stops", HttpMethod.GET, null,
+                    getParameterizedTypeReference()
+              ).getBody();
+        return new ArrayList<>(stopResponse.getContent());
     }
 
-    public List<BusStop> getNearby(float lat, float lon) {
-        final ResponseEntity<PagedModel<BusStop>> stopResponse = restTemplate
-                .exchange(GET_ALL_NEARBY_STOPS.concat("lat=" + lat + "&lon="+ lon),
-                        HttpMethod.GET, null,
-                        getParameterizedTypeReference()
-                );
-        return new ArrayList<>(Objects.requireNonNull(stopResponse.getBody()).getContent());
+    public List<BusStop> getNearby(double lat, double lon) {
+        final BusStop[] stopResponse = restTemplate
+              .getForObject(SERVER_URL + "stops/search/findNearby?lat={lat}&lon={lon}",
+                    BusStop[].class,
+                    Map.of("lat", lat,
+                          "lon", lon)
+              );
+        return Arrays.asList(stopResponse);
     }
 
-    private static ParameterizedTypeReference<PagedModel<BusStop>> getParameterizedTypeReference() {
-        return new ParameterizedTypeReference<>() {};
+    private static ParameterizedTypeReference<CollectionModel<BusStop>> getParameterizedTypeReference() {
+        return new ParameterizedTypeReference<>() {
+        };
     }
 }

@@ -14,10 +14,6 @@
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-
-
-
-
     <script>
         $("document").ready(function() {
 
@@ -100,10 +96,10 @@
 
     </div>
 </form>
-<form id="crearAnuncio" action="createAnnouncement/confirm" method="POST" th:action="@{createAnnouncement/confirm}" th:object="${anuncio}">
+<form th:action="@{editarAnuncio/confirm}" method="post" th:object="${announce}">
 
     <input type="hidden" id="link" value="" th:field="*{imgLink}"/>
-
+    <input type="hidden" name="announcementURI" th:value="${uri}"/>
     <div class="nav justify-content-center" style="padding-top: 2%">
         <div class="input-group" style="max-width: 20%">
             <div class="input-group-prepend">
@@ -159,74 +155,55 @@
     <input th:field="*{arrival}" type="hidden" id="arrival" name="arrival" value=""/>
 
 
-<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.css' type='text/css' />
-<!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
-<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.css' type='text/css' />
+    <!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
 
-<div class="row container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%">
-    <h5 for="map" style='width: 45%'>Seleccionar origen</h5>
-    <h5 for="mapDes" style='width: 45%; margin-left: 20px'>Seleccionar destino</h5>
-</div>
+    <div class="row container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%">
+        <h5 for="map" style='width: 45%'>Seleccionar origen</h5>
+        <h5 for="mapDes" style='width: 45%; margin-left: 20px'>Seleccionar destino</h5>
+    </div>
 
-<div class="row container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%">
-    <div id='map' style='width: 45%; height: 300px; border: 4px solid lightsteelblue'></div>
-    <div id="mapDes" style="width: 45%; height: 300px; margin-left: 20px; border: 4px solid indianred"></div>
-</div>
+    <div class="row container-fluid justify-content-center" style="padding-left: 5%; padding-right: 5%">
+        <div id='map' style='width: 45%; height: 300px; border: 4px solid lightsteelblue'></div>
+        <div id="mapDes" style="width: 45%; height: 300px; margin-left: 20px; border: 4px solid indianred"></div>
+    </div>
 
-<script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [-4.42034, 36.72016],
-        zoom: 11
-    });
+    <script th:inline="javascript">
+        var lati = /*[[${announce.departureLatitude}]]*/ 1.1;
+        var longi = /*[[${announce.departureLongitude}]]*/ 1.1;
 
-    map.addControl(new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl
-    }));
+        mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [longi, lati],
+            zoom: 11
+        });
 
-    map.addControl(new mapboxgl.NavigationControl());
+        map.addControl(new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        }));
 
-    map.addControl(new mapboxgl.GeolocateControl({
-        positionOptions: {
-            enableHighAccuracy: true
-        },
-        trackUserLocation: true
-    }));
+        map.addControl(new mapboxgl.NavigationControl());
 
-    var str, strLatOri, strLongOri;
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }));
 
-    var marker = new mapboxgl.Marker({
-        draggable: true
-    })
-        .setLngLat([-4.42034, 36.72016])
-        .addTo(map);
-    var lngLat = marker.getLngLat();
-    str = JSON.stringify(lngLat);
-    coordArray = str.split(",");
-    strLongOri = coordArray[0].slice(7);
-    strLatOri = coordArray[1].slice(6,-1);
-    document.getElementById('latOrigen').value = strLatOri;
-    document.getElementById('longOrigen').value= strLongOri;
+        var str, strLatOri, strLongOri;
 
-
-    map.on('click', function(e) {
-        str = JSON.stringify(e.lngLat);
-        coordArray = str.split(",");
-        strLongOri = coordArray[0].slice(7);
-        strLatOri = coordArray[1].slice(6,-1);
-        document.getElementById('latOrigen').value = strLatOri;
-        document.getElementById('longOrigen').value= strLongOri;
-        marker
-            .setLngLat(e.lngLat)
+        var marker = new mapboxgl.Marker({
+            draggable: true
+        })
+            .setLngLat([longi, lati])
             .addTo(map);
-    });
-
-    function onDragEnd() {
         var lngLat = marker.getLngLat();
         str = JSON.stringify(lngLat);
         coordArray = str.split(",");
@@ -234,76 +211,69 @@
         strLatOri = coordArray[1].slice(6,-1);
         document.getElementById('latOrigen').value = strLatOri;
         document.getElementById('longOrigen').value= strLongOri;
-    }
 
-    marker.on('dragend', onDragEnd);
 
-</script>
+        map.on('click', function(e) {
+            str = JSON.stringify(e.lngLat);
+            coordArray = str.split(",");
+            strLongOri = coordArray[0].slice(7);
+            strLatOri = coordArray[1].slice(6,-1);
+            document.getElementById('latOrigen').value = strLatOri;
+            document.getElementById('longOrigen').value= strLongOri;
+            marker
+                .setLngLat(e.lngLat)
+                .addTo(map);
+        });
 
-<script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
-    var mapDes = new mapboxgl.Map({
-        container: 'mapDes',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [-4.42034, 36.72016],
-        zoom: 11
-    });
+        function onDragEnd() {
+            var lngLat = marker.getLngLat();
+            str = JSON.stringify(lngLat);
+            coordArray = str.split(",");
+            strLongOri = coordArray[0].slice(7);
+            strLatOri = coordArray[1].slice(6,-1);
+            document.getElementById('latOrigen').value = strLatOri;
+            document.getElementById('longOrigen').value= strLongOri;
+        }
 
-    mapDes.addControl(new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl
-    }));
+        marker.on('dragend', onDragEnd);
 
-    mapDes.addControl(new mapboxgl.NavigationControl());
+    </script>
 
-    mapDes.addControl(new mapboxgl.GeolocateControl({
-        positionOptions: {
-            enableHighAccuracy: true
-        },
-        trackUserLocation: true
-    }));
+    <script th:inline="javascript">
+        var lo = /*[[${announce.arrivalLongitude}]]*/ 1.1;
+        var la = /*[[${announce.arrivalLatitude}]]*/ 1.1;
+        mapboxgl.accessToken = 'pk.eyJ1IjoiamVzdXNtZyIsImEiOiJjazM2ODlhNjMwcWI2M21wZWozdHZodzdlIn0.DWuZhMtWp053EG-JG1gVgQ';
+        var mapDes = new mapboxgl.Map({
+            container: 'mapDes',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [lo, la],
+            zoom: 11
+        });
 
-    var xhReq = new XMLHttpRequest();
+        mapDes.addControl(new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        }));
 
-    var strDes, strLatDes, strLongDes;
+        mapDes.addControl(new mapboxgl.NavigationControl());
 
-    var markerDes = new mapboxgl.Marker({
-        draggable: true
-    })
-        .setLngLat([-4.42034, 36.72016])
-        .addTo(mapDes);
+        mapDes.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }));
 
-    var lngLatDes = markerDes.getLngLat();
-    strDes = JSON.stringify(lngLatDes);
-    coordArrayDes = strDes.split(",");
-    strLongDes = coordArrayDes[0].slice(7);
-    strLatDes = coordArrayDes[1].slice(6,-1);
-    document.getElementById('latDestino').value = strLatDes;
-    document.getElementById('longDestino').value= strLongDes;
-    safeAddress(strLatDes,strLongDes);
+        var xhReq = new XMLHttpRequest();
 
-    mapDes.on('click', function(e) {
-        strDes = JSON.stringify(e.lngLat);
-        coordArrayDes = strDes.split(",");
-        strLongDes = coordArrayDes[0].slice(7);
-        strLatDes = coordArrayDes[1].slice(6,-1);
-        document.getElementById('latDestino').value = strLatDes;
-        document.getElementById('longDestino').value= strLongDes;
-        markerDes
-            .setLngLat(e.lngLat)
+        var strDes, strLatDes, strLongDes;
+
+        var markerDes = new mapboxgl.Marker({
+            draggable: true
+        })
+            .setLngLat([lo, la])
             .addTo(mapDes);
 
-        safeAddress(strLatDes,strLongDes);
-    });
-    
-    function safeAddress(lat,lng) {
-        xhReq.open("GET","https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lng + "&zoom=8&addressdetails=1",false)
-        xhReq.send(null);
-        var jsonObject = JSON.parse(xhReq.responseText);
-        document.getElementById('arrival').value= jsonObject.display_name;
-    }
-
-    function onDragEndDes() {
         var lngLatDes = markerDes.getLngLat();
         strDes = JSON.stringify(lngLatDes);
         coordArrayDes = strDes.split(",");
@@ -312,16 +282,47 @@
         document.getElementById('latDestino').value = strLatDes;
         document.getElementById('longDestino').value= strLongDes;
         safeAddress(strLatDes,strLongDes);
-    }
 
-    markerDes.on('dragend', onDragEndDes);
+        mapDes.on('click', function(e) {
+            strDes = JSON.stringify(e.lngLat);
+            coordArrayDes = strDes.split(",");
+            strLongDes = coordArrayDes[0].slice(7);
+            strLatDes = coordArrayDes[1].slice(6,-1);
+            document.getElementById('latDestino').value = strLatDes;
+            document.getElementById('longDestino').value= strLongDes;
+            markerDes
+                .setLngLat(e.lngLat)
+                .addTo(mapDes);
 
-</script>
+            safeAddress(strLatDes,strLongDes);
+        });
+
+        function safeAddress(lat,lng) {
+            xhReq.open("GET","https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lng + "&zoom=8&addressdetails=1",false)
+            xhReq.send(null);
+            var jsonObject = JSON.parse(xhReq.responseText);
+            document.getElementById('arrival').value= jsonObject.display_name;
+        }
+
+        function onDragEndDes() {
+            var lngLatDes = markerDes.getLngLat();
+            strDes = JSON.stringify(lngLatDes);
+            coordArrayDes = strDes.split(",");
+            strLongDes = coordArrayDes[0].slice(7);
+            strLatDes = coordArrayDes[1].slice(6,-1);
+            document.getElementById('latDestino').value = strLatDes;
+            document.getElementById('longDestino').value= strLongDes;
+            safeAddress(strLatDes,strLongDes);
+        }
+
+        markerDes.on('dragend', onDragEndDes);
+
+    </script>
 
     <br>
     <br>
     <div class="row container-fluid justify-content-center" style="padding-left: 9%; padding-right: 9%">
-        <input type="submit" class="btn btn-primary btn-lg btn-block" value="¡Crear un nuevo anuncio!"></input>
+        <input type="submit" class="btn btn-primary btn-lg btn-block" value="¡Modificar Anuncio!"></input>
     </div>
     <br>
     <br>

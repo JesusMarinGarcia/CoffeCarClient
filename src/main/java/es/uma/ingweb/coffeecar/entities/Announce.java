@@ -1,22 +1,20 @@
 package es.uma.ingweb.coffeecar.entities;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 @Data
+@JsonSerialize
 @NoArgsConstructor
-@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
 @AllArgsConstructor
-public class Announcement{
+public class Announce extends EntityModel<Announce> {
     private long id;
     private String title;
     private String departureTime;
@@ -26,7 +24,7 @@ public class Announcement{
     private double arrivalLatitude;
     private double arrivalLongitude;
     private double departureLatitude;
-    private double getDepartureLongitude;
+    private double departureLongitude;
     private String imgLink;
     private int seats;
     private User driver;
