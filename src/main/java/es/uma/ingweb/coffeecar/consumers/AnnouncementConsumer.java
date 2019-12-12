@@ -114,8 +114,9 @@ public class AnnouncementConsumer {
         return restTemplate.postForLocation(SERVER_URL + "announces", announce);
     }
 
-    public void edit(String uri, JsonNode announce) {
-        restTemplate.exchange(uri, HttpMethod.PUT, null, getAnnounceEntityModelParameterizedTypeReference(),announce);
+    public URI edit(String uri, JsonNode announce) {
+        delete(uri);
+        return create(announce);
     }
     public void delete(String uri) {
           restTemplate.delete(uri);

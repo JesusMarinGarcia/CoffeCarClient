@@ -97,17 +97,18 @@ public class AnnounceController {
         Announce announce = announcementConsumer.getAnnouncementByURI(uri);
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         List<User> passengers = announce.getPassengers();
+        String announceURI = uri;
         if(!passengers.contains(user)) {
             passengers.add(user);
-            edit(announce);
+            announceURI = edit(announce).toString();
 
             redirectAttrs
                     .addFlashAttribute("mensaje", "Te has unido al viaje");
         }
-        return "redirect:/details?announcementURI=" + announce.getLink("self").map(Link::getHref).get();
+        return "redirect:/details?announcementURI=" + announceURI;
     }
 
-    private void edit(Announce announce){
+    private URI edit(Announce announce){
         ObjectMapper objectMapper = new ObjectMapper();
 
         ObjectNode announceNode = objectMapper.valueToTree(announce);
@@ -123,7 +124,7 @@ public class AnnounceController {
 
         String uri = announce.getLink("self").map(Link::getHref).get();
 
-        announcementConsumer.edit(uri, announceNode);
+        return announcementConsumer.edit(uri, announceNode);
     }
 
     private URI create(Announce announce, User driver){
@@ -144,16 +145,17 @@ public class AnnounceController {
         User user = userConsumer.getByEmail(authenticationToken.getPrincipal().getAttribute("email"));
         List<User> newPassengers = announce.getPassengers();
         boolean successfulRemoval = newPassengers.remove(user);
+        String announceURI = uri;
         if(successfulRemoval){
             announce.setPassengers(newPassengers);
-            //announcementConsumer.edit(announce);
+            announceURI = edit(announce).toString();
             redirectAttrs
                     .addFlashAttribute("mensaje", "Has dejado el viaje");
         }else {
             redirectAttrs
                     .addFlashAttribute("mensaje", "No has podido dejarlo o ya no estabas unido");
         }
-        return "redirect:/";
+        return "redirect:/details?announcementURI=" + announceURI;
     }
 
     @PostMapping("/announcementDelete")
